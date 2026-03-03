@@ -49,6 +49,23 @@ export function isStandardJSONSchema(value: unknown): boolean {
 	return jsonSchema !== null && typeof jsonSchema === "object";
 }
 
+export function isResponseShorthandObject(value: unknown): boolean {
+	if (value === null || typeof value !== "object") return false;
+	if (isStandardJSONSchema(value)) return false;
+	const obj = value as Record<string, unknown>;
+	if ("content" in obj) return false;
+	return "schema" in obj || "contentType" in obj || "headers" in obj
+		|| "example" in obj || "examples" in obj;
+}
+
+export function isBodyShorthandObject(value: unknown): boolean {
+	if (value === null || typeof value !== "object") return false;
+	if (isStandardJSONSchema(value)) return false;
+	if (isFullRequestBodyObject(value)) return false;
+	const obj = value as Record<string, unknown>;
+	return "schema" in obj || "contentType" in obj || "example" in obj || "examples" in obj;
+}
+
 export function isFullResponseObject(value: unknown): boolean {
 	if (value === null || typeof value !== "object") {
 		return false;
@@ -57,6 +74,7 @@ export function isFullResponseObject(value: unknown): boolean {
 		return false;
 	}
 	const obj = value as Record<string, unknown>;
+	if ("schema" in obj) return false;
 	return "content" in obj || "description" in obj;
 }
 

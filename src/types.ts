@@ -98,6 +98,38 @@ export interface ResponseObject {
 	links?: Record<string, unknown>;
 }
 
+export interface ExampleObject {
+	summary?: string;
+	description?: string;
+	value?: unknown;
+	externalValue?: string;
+}
+
+export interface HeaderObject {
+	schema?: SchemaOrRef;
+	description?: string;
+	required?: boolean;
+	example?: unknown;
+}
+
+export interface ResponseShorthandObject {
+	schema?: StandardJSONSchemaV1 | string;
+	contentType?: string;
+	description?: string;
+	headers?: Record<string, HeaderObject>;
+	example?: unknown;
+	examples?: Record<string, ExampleObject>;
+}
+
+export interface BodyShorthandObject {
+	schema?: StandardJSONSchemaV1;
+	contentType?: string;
+	description?: string;
+	required?: boolean;
+	example?: unknown;
+	examples?: Record<string, ExampleObject>;
+}
+
 export interface OperationObject {
 	operationId?: string;
 	summary?: string;
@@ -158,14 +190,14 @@ export interface RouteShorthand {
 	params?: StandardJSONSchemaV1;
 	headers?: StandardJSONSchemaV1;
 	cookies?: StandardJSONSchemaV1;
-	body?: StandardJSONSchemaV1 | RequestBodyObject;
+	body?: StandardJSONSchemaV1 | RequestBodyObject | BodyShorthandObject;
 	summary?: string;
 	description?: string;
 	operationId?: string;
 	tags?: string[];
 	deprecated?: boolean;
 	security?: SecurityRequirementObject[];
-	[statusCode: number]: StandardJSONSchemaV1 | ResponseObject | string | null;
+	[statusCode: number]: StandardJSONSchemaV1 | ResponseObject | ResponseShorthandObject | string | null;
 }
 
 export interface RouteDefinition extends RouteShorthand {

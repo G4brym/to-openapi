@@ -199,6 +199,66 @@ describe("openapi()", () => {
 		await assertValidOpenAPI(doc);
 	});
 
+	it("expands response shorthand with custom content type", async () => {
+		const doc = openapi({
+			...baseDefinition,
+			paths: {
+				"GET /health": {
+					200: { contentType: "text/plain" } as any,
+				},
+			},
+		});
+
+		const resp = doc.paths["/health"]?.get?.responses?.["200"] as any;
+		expect(resp.content["text/plain"]).toBeDefined();
+		expect(resp.content["text/plain"].schema).toEqual({ type: "string" });
+		await assertValidOpenAPI(doc);
+	});
+
+	it("expands response shorthand with headers and examples", async () => {
+		const doc = openapi({
+			...baseDefinition,
+			paths: {
+				"GET /tasks": {
+					200: {
+						schema: createMockSchema({ type: "array", items: { type: "object" } }),
+						headers: {
+							"X-Total-Count": {
+								schema: { type: "integer" },
+								description: "Total items",
+							},
+						},
+						example: [{ id: "1" }],
+					} as any,
+				},
+			},
+		});
+
+		const resp = doc.paths["/tasks"]?.get?.responses?.["200"] as any;
+		expect(resp.headers["X-Total-Count"]).toBeDefined();
+		expect(resp.content["application/json"].example).toEqual([{ id: "1" }]);
+		await assertValidOpenAPI(doc);
+	});
+
+	it("expands body shorthand with custom content type", async () => {
+		const doc = openapi({
+			...baseDefinition,
+			paths: {
+				"POST /upload": {
+					body: {
+						schema: createMockSchema({ type: "object", properties: { file: { type: "string", format: "binary" } } }),
+						contentType: "multipart/form-data",
+					} as any,
+					201: null,
+				},
+			},
+		});
+
+		const body = doc.paths["/upload"]?.post?.requestBody as any;
+		expect(body.content["multipart/form-data"]).toBeDefined();
+		await assertValidOpenAPI(doc);
+	});
+
 	it("runs transformSchema on body and response schemas", () => {
 		const stripInternal: ToOpenapiPlugin = {
 			name: "strip-internal",

@@ -18,7 +18,7 @@ Each status code is given a default description based on the HTTP standard (e.g.
 
 ## Schema Responses
 
-Pass a Standard Schema object to a status code key. The schema is resolved to JSON Schema and wrapped in `application/json` content:
+Pass a Standard Schema object to a status code key. The schema is resolved to JSON Schema and wrapped in `application/json` content by default:
 
 ```ts
 'GET /pets/:id': {
@@ -146,6 +146,109 @@ const doc = openapi({
 ```
 
 This demonstrates all four response styles in a single route: schema object (`201`, `400`), string reference (`409`), full ResponseObject (`422`), and null (`500`).
+
+## Custom Content Types
+
+Use a `ResponseShorthandObject` to specify a content type other than `application/json`. When a schema is omitted, it is inferred from the content type where possible.
+
+```ts
+'GET /health': {
+  // text/plain — schema inferred as { type: "string" }
+  200: { contentType: 'text/plain' },
+}
+```
+
+```ts
+'GET /file': {
+  // binary — schema inferred as { type: "string", format: "binary" }
+  200: { contentType: 'application/octet-stream' },
+}
+```
+
+```ts
+'POST /upload': {
+  // explicit schema required for other content types
+  200: {
+    schema: FileResultSchema,
+    contentType: 'multipart/form-data',
+  },
+}
+```
+
+The body shorthand supports the same `contentType` option:
+
+```ts
+'POST /upload': {
+  body: {
+    schema: UploadSchema,
+    contentType: 'multipart/form-data',
+  },
+  201: null,
+}
+```
+
+## Response Headers
+
+Add `headers` to a response shorthand to declare response headers:
+
+```ts
+'GET /tasks': {
+  200: {
+    schema: TaskListSchema,
+    headers: {
+      'X-RateLimit-Remaining': {
+        schema: { type: 'integer' },
+        description: 'Number of requests remaining',
+      },
+      'X-RateLimit-Reset': {
+        schema: { type: 'integer' },
+        description: 'UTC epoch seconds until limit resets',
+      },
+    },
+  },
+}
+```
+
+Each header value is a `HeaderObject` with optional `schema`, `description`, `required`, and `example` fields.
+
+## Examples
+
+Add `example` or `examples` to a response or body shorthand:
+
+```ts
+'GET /tasks/:id': {
+  200: {
+    schema: TaskSchema,
+    example: { id: '1', title: 'Buy groceries', done: false },
+  },
+}
+```
+
+For multiple named examples:
+
+```ts
+'GET /tasks/:id': {
+  200: {
+    schema: TaskSchema,
+    examples: {
+      complete: { summary: 'Completed task', value: { id: '1', title: 'Buy groceries', done: true } },
+      incomplete: { summary: 'Incomplete task', value: { id: '2', title: 'Walk dog', done: false } },
+    },
+  },
+}
+```
+
+Body shorthands also support `example` and `examples`:
+
+```ts
+'POST /tasks': {
+  body: {
+    schema: CreateTaskSchema,
+    example: { title: 'Buy groceries' },
+  },
+  201: TaskSchema,
+}
+```
 
 ## Default Descriptions
 

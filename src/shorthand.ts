@@ -2,17 +2,26 @@ import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { STATUS_DESCRIPTIONS, generateOperationId } from "./defaults.js";
 import type { SchemaResolver } from "./resolver.js";
 import type {
+	BodyShorthandObject,
+	MediaTypeObject,
 	OperationObject,
 	ParameterObject,
 	ParsedRoute,
 	RequestBodyObject,
 	ResponseObject,
+	ResponseShorthandObject,
 	RouteShorthand,
 	SchemaContext,
 	SchemaOrRef,
 	ToOpenapiPlugin,
 } from "./types.js";
-import { isFullRequestBodyObject, isFullResponseObject, isStandardJSONSchema } from "./utils.js";
+import {
+	isBodyShorthandObject,
+	isFullRequestBodyObject,
+	isFullResponseObject,
+	isResponseShorthandObject,
+	isStandardJSONSchema,
+} from "./utils.js";
 
 function runTransformSchema(
 	plugins: ToOpenapiPlugin[],
@@ -209,13 +218,38 @@ function expandCookieParams(
 	}
 }
 
+function inferSchema(contentType: string): SchemaOrRef | undefined {
+	if (contentType.startsWith("text/")) return { type: "string" };
+	if (contentType === "application/octet-stream") return { type: "string", format: "binary" };
+	return undefined;
+}
+
 function expandBody(
-	body: StandardJSONSchemaV1 | RequestBodyObject,
+	body: StandardJSONSchemaV1 | RequestBodyObject | BodyShorthandObject,
 	resolver: SchemaResolver,
 	plugins: ToOpenapiPlugin[],
 ): RequestBodyObject {
 	if (isFullRequestBodyObject(body)) {
 		return body as RequestBodyObject;
+	}
+
+	if (isBodyShorthandObject(body)) {
+		const shorthand = body as BodyShorthandObject;
+		const contentType = shorthand.contentType ?? "application/json";
+		let schema: SchemaOrRef;
+		if (shorthand.schema) {
+			schema = resolver.resolve(shorthand.schema);
+			schema = runTransformSchema(plugins, schema, { location: "body" });
+		} else {
+			schema = inferSchema(contentType) ?? { type: "object" };
+		}
+		const mediaType: MediaTypeObject = { schema };
+		if (shorthand.example !== undefined) mediaType.example = shorthand.example;
+		if (shorthand.examples) mediaType.examples = shorthand.examples;
+		const result: RequestBodyObject = { content: { [contentType]: mediaType } };
+		if (shorthand.description) result.description = shorthand.description;
+		if (shorthand.required !== undefined) result.required = shorthand.required;
+		return result;
 	}
 
 	let schema = resolver.resolve(body as StandardJSONSchemaV1);
@@ -257,6 +291,30 @@ function expandResponses(
 					"application/json": { schema: ref },
 				},
 			};
+			continue;
+		}
+
+		if (isResponseShorthandObject(value)) {
+			const shorthand = value as ResponseShorthandObject;
+			const contentType = shorthand.contentType ?? "application/json";
+			let schema: SchemaOrRef;
+			if (shorthand.schema) {
+				const resolved = typeof shorthand.schema === "string"
+					? resolver.resolve(shorthand.schema)
+					: resolver.resolve(shorthand.schema);
+				schema = runTransformSchema(plugins, resolved, { location: "response" });
+			} else {
+				schema = inferSchema(contentType) ?? { type: "object" };
+			}
+			const mediaType: MediaTypeObject = { schema };
+			if (shorthand.example !== undefined) mediaType.example = shorthand.example;
+			if (shorthand.examples) mediaType.examples = shorthand.examples;
+			const response: ResponseObject = {
+				description: shorthand.description ?? description,
+				content: { [contentType]: mediaType },
+			};
+			if (shorthand.headers) response.headers = shorthand.headers;
+			responses[String(statusCode)] = response;
 			continue;
 		}
 

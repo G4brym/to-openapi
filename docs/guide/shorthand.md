@@ -56,14 +56,14 @@ The `RouteShorthand` interface accepts the following fields:
 | `params` | Standard Schema | Object schema; each property becomes a path parameter |
 | `headers` | Standard Schema | Object schema; each property becomes a header parameter |
 | `cookies` | Standard Schema | Object schema; each property becomes a cookie parameter |
-| `body` | Standard Schema or `RequestBodyObject` | Request body schema (wrapped in `application/json`) or full OpenAPI RequestBodyObject |
+| `body` | Standard Schema, `RequestBodyObject`, or `BodyShorthandObject` | Request body schema (wrapped in `application/json`), full OpenAPI RequestBodyObject, or shorthand with `contentType`/`example`/`examples` |
 | `summary` | `string` | Short summary of the operation |
 | `description` | `string` | Detailed description of the operation |
 | `operationId` | `string` | Unique identifier for the operation (auto-generated if omitted) |
 | `tags` | `string[]` | Tags for grouping operations |
 | `deprecated` | `boolean` | Marks the operation as deprecated |
 | `security` | `SecurityRequirementObject[]` | Security requirements for this operation |
-| `[statusCode]` | Schema, `string`, `null`, or `ResponseObject` | Response for a given HTTP status code (e.g., `200`, `201`, `404`) |
+| `[statusCode]` | Schema, `string`, `null`, `ResponseObject`, or `ResponseShorthandObject` | Response for a given HTTP status code (e.g., `200`, `201`, `404`) |
 
 ## Full Example
 

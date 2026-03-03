@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
 	deepFreeze,
 	deepMerge,
+	isBodyShorthandObject,
 	isFullRequestBodyObject,
 	isFullResponseObject,
+	isResponseShorthandObject,
 	isStandardJSONSchema,
 } from "../../src/utils";
 import { createMockSchema } from "../helpers/mock-schemas";
@@ -162,5 +164,73 @@ describe("isFullRequestBodyObject", () => {
 
 	it("returns false for null", () => {
 		expect(isFullRequestBodyObject(null)).toBe(false);
+	});
+});
+
+describe("isResponseShorthandObject", () => {
+	it("returns true for object with schema", () => {
+		expect(isResponseShorthandObject({ schema: createMockSchema({ type: "string" }) })).toBe(true);
+	});
+
+	it("returns true for object with contentType", () => {
+		expect(isResponseShorthandObject({ contentType: "text/plain" })).toBe(true);
+	});
+
+	it("returns true for object with headers", () => {
+		expect(isResponseShorthandObject({ headers: { "x-rate-limit": { schema: { type: "integer" } } } })).toBe(true);
+	});
+
+	it("returns true for object with example", () => {
+		expect(isResponseShorthandObject({ example: { id: "123" } })).toBe(true);
+	});
+
+	it("returns true for object with examples", () => {
+		expect(isResponseShorthandObject({ examples: { one: { value: 1 } } })).toBe(true);
+	});
+
+	it("returns false for object with content (full ResponseObject)", () => {
+		expect(isResponseShorthandObject({ content: { "application/json": {} } })).toBe(false);
+	});
+
+	it("returns false for a standard JSON schema", () => {
+		expect(isResponseShorthandObject(createMockSchema({ type: "string" }))).toBe(false);
+	});
+
+	it("returns false for null", () => {
+		expect(isResponseShorthandObject(null)).toBe(false);
+	});
+
+	it("returns false for plain object without shorthand keys", () => {
+		expect(isResponseShorthandObject({ foo: "bar" })).toBe(false);
+	});
+});
+
+describe("isBodyShorthandObject", () => {
+	it("returns true for object with schema", () => {
+		expect(isBodyShorthandObject({ schema: createMockSchema({ type: "object" }) })).toBe(true);
+	});
+
+	it("returns true for object with contentType", () => {
+		expect(isBodyShorthandObject({ contentType: "text/plain" })).toBe(true);
+	});
+
+	it("returns true for object with example", () => {
+		expect(isBodyShorthandObject({ example: { name: "test" } })).toBe(true);
+	});
+
+	it("returns true for object with examples", () => {
+		expect(isBodyShorthandObject({ examples: { one: { value: 1 } } })).toBe(true);
+	});
+
+	it("returns false for object with content (full RequestBodyObject)", () => {
+		expect(isBodyShorthandObject({ content: { "application/json": {} } })).toBe(false);
+	});
+
+	it("returns false for a standard JSON schema", () => {
+		expect(isBodyShorthandObject(createMockSchema({ type: "object" }))).toBe(false);
+	});
+
+	it("returns false for null", () => {
+		expect(isBodyShorthandObject(null)).toBe(false);
 	});
 });

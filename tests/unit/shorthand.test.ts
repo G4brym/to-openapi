@@ -201,6 +201,66 @@ describe("expandRoute", () => {
 
 			expect(op.requestBody).toEqual(body);
 		});
+
+		it("expands body shorthand with custom contentType", () => {
+			const resolver = makeResolver();
+			const body = {
+				schema: createMockSchema({ type: "object", properties: { file: { type: "string" } } }),
+				contentType: "multipart/form-data",
+			};
+			const op = expandRoute(makeParsed({ method: "post" }), { body: body as any }, resolver);
+
+			expect(op.requestBody).toEqual({
+				content: {
+					"multipart/form-data": {
+						schema: { type: "object", properties: { file: { type: "string" } } },
+					},
+				},
+			});
+		});
+
+		it("expands body shorthand with example", () => {
+			const resolver = makeResolver();
+			const body = {
+				schema: createMockSchema({ type: "object" }),
+				example: { name: "test" },
+			};
+			const op = expandRoute(makeParsed({ method: "post" }), { body: body as any }, resolver);
+
+			const media = (op.requestBody as any)?.content?.["application/json"];
+			expect(media.example).toEqual({ name: "test" });
+		});
+
+		it("infers string schema for text/plain body without schema", () => {
+			const resolver = makeResolver();
+			const body = { contentType: "text/plain" };
+			const op = expandRoute(makeParsed({ method: "post" }), { body: body as any }, resolver);
+
+			const media = (op.requestBody as any)?.content?.["text/plain"];
+			expect(media.schema).toEqual({ type: "string" });
+		});
+
+		it("infers binary schema for application/octet-stream body without schema", () => {
+			const resolver = makeResolver();
+			const body = { contentType: "application/octet-stream" };
+			const op = expandRoute(makeParsed({ method: "post" }), { body: body as any }, resolver);
+
+			const media = (op.requestBody as any)?.content?.["application/octet-stream"];
+			expect(media.schema).toEqual({ type: "string", format: "binary" });
+		});
+
+		it("expands body shorthand with description and required", () => {
+			const resolver = makeResolver();
+			const body = {
+				schema: createMockSchema({ type: "object" }),
+				description: "The request body",
+				required: true,
+			};
+			const op = expandRoute(makeParsed({ method: "post" }), { body: body as any }, resolver);
+
+			expect((op.requestBody as any)?.description).toBe("The request body");
+			expect((op.requestBody as any)?.required).toBe(true);
+		});
 	});
 
 	describe("response shorthands", () => {
@@ -279,6 +339,121 @@ describe("expandRoute", () => {
 			const op = expandRoute(makeParsed(), definition, resolver);
 
 			expect(op.responses?.["418"]?.description).toBe("Response 418");
+		});
+
+		it("expands response shorthand with custom contentType", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				200: { contentType: "text/plain" } as any,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			expect(op.responses?.["200"]).toEqual({
+				description: "Successful response",
+				content: {
+					"text/plain": {
+						schema: { type: "string" },
+					},
+				},
+			});
+		});
+
+		it("expands response shorthand with schema and contentType", () => {
+			const resolver = makeResolver();
+			const schema = createMockSchema({ type: "array", items: { type: "string" } });
+			const definition: RouteShorthand = {
+				200: { schema, contentType: "application/json" } as any,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			expect(op.responses?.["200"]).toEqual({
+				description: "Successful response",
+				content: {
+					"application/json": {
+						schema: { type: "array", items: { type: "string" } },
+					},
+				},
+			});
+		});
+
+		it("expands response shorthand with headers", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				200: {
+					schema: createMockSchema({ type: "object" }),
+					headers: {
+						"X-RateLimit-Remaining": {
+							schema: { type: "integer" },
+							description: "Remaining rate limit",
+						},
+					},
+				} as any,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			const resp = op.responses?.["200"] as any;
+			expect(resp.headers).toEqual({
+				"X-RateLimit-Remaining": {
+					schema: { type: "integer" },
+					description: "Remaining rate limit",
+				},
+			});
+		});
+
+		it("expands response shorthand with example", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				200: {
+					schema: createMockSchema({ type: "object" }),
+					example: { id: "123", name: "Test" },
+				} as any,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			const media = (op.responses?.["200"] as any)?.content?.["application/json"];
+			expect(media.example).toEqual({ id: "123", name: "Test" });
+		});
+
+		it("expands response shorthand with examples", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				200: {
+					schema: createMockSchema({ type: "object" }),
+					examples: {
+						success: { summary: "Successful", value: { id: "1" } },
+					},
+				} as any,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			const media = (op.responses?.["200"] as any)?.content?.["application/json"];
+			expect(media.examples).toEqual({
+				success: { summary: "Successful", value: { id: "1" } },
+			});
+		});
+
+		it("expands response shorthand with custom description", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				200: {
+					schema: createMockSchema({ type: "object" }),
+					description: "Custom success",
+				} as any,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			expect(op.responses?.["200"]?.description).toBe("Custom success");
+		});
+
+		it("infers binary schema for application/octet-stream response", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				200: { contentType: "application/octet-stream" } as any,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			const media = (op.responses?.["200"] as any)?.content?.["application/octet-stream"];
+			expect(media.schema).toEqual({ type: "string", format: "binary" });
 		});
 	});
 

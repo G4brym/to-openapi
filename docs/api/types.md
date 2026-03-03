@@ -17,6 +17,10 @@ import type {
   ParameterObject,
   RequestBodyObject,
   ResponseObject,
+  ExampleObject,
+  HeaderObject,
+  ResponseShorthandObject,
+  BodyShorthandObject,
   OperationObject,
   PathItemObject,
   ComponentsObject,
@@ -231,6 +235,72 @@ interface ResponseObject {
 
 ---
 
+### `ExampleObject`
+
+Describes an example value for a media type.
+
+```ts
+interface ExampleObject {
+  summary?: string
+  description?: string
+  value?: unknown
+  externalValue?: string
+}
+```
+
+---
+
+### `HeaderObject`
+
+Describes a single response header.
+
+```ts
+interface HeaderObject {
+  schema?: SchemaOrRef
+  description?: string
+  required?: boolean
+  example?: unknown
+}
+```
+
+---
+
+### `ResponseShorthandObject`
+
+A shorthand for defining responses with custom content types, headers, or examples.
+
+```ts
+interface ResponseShorthandObject {
+  schema?: StandardJSONSchemaV1 | string
+  contentType?: string
+  description?: string
+  headers?: Record<string, HeaderObject>
+  example?: unknown
+  examples?: Record<string, ExampleObject>
+}
+```
+
+When `schema` is omitted, it is inferred from `contentType` (`text/*` → `{ type: "string" }`, `application/octet-stream` → `{ type: "string", format: "binary" }`).
+
+---
+
+### `BodyShorthandObject`
+
+A shorthand for defining request bodies with custom content types or examples.
+
+```ts
+interface BodyShorthandObject {
+  schema?: StandardJSONSchemaV1
+  contentType?: string
+  description?: string
+  required?: boolean
+  example?: unknown
+  examples?: Record<string, ExampleObject>
+}
+```
+
+---
+
 ### `OperationObject`
 
 Describes a single API operation on a path.
@@ -337,14 +407,14 @@ interface RouteShorthand {
   params?: StandardJSONSchemaV1
   headers?: StandardJSONSchemaV1
   cookies?: StandardJSONSchemaV1
-  body?: StandardJSONSchemaV1 | RequestBodyObject
+  body?: StandardJSONSchemaV1 | RequestBodyObject | BodyShorthandObject
   summary?: string
   description?: string
   operationId?: string
   tags?: string[]
   deprecated?: boolean
   security?: SecurityRequirementObject[]
-  [statusCode: number]: StandardJSONSchemaV1 | ResponseObject | string | null
+  [statusCode: number]: StandardJSONSchemaV1 | ResponseObject | ResponseShorthandObject | string | null
 }
 ```
 
