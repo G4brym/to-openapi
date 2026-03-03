@@ -72,6 +72,7 @@ The `externalDocs` value from the base document is used if present. Source docum
 | `openapi` | Always from base |
 | `info` | Always from base |
 | `paths` | Merged; duplicate method+path throws `DUPLICATE_PATH` |
+| `webhooks` | Merged; duplicate method+name throws `DUPLICATE_PATH` |
 | `components.schemas` | Merged; duplicate names throw `DUPLICATE_SCHEMA` |
 | `components.securitySchemes` | Merged; duplicate names throw `DUPLICATE_SCHEMA` |
 | `tags` | Merged by name; first occurrence wins |

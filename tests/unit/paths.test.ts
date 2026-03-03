@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ToOpenapiError } from "../../src/errors";
-import { parseRouteKey } from "../../src/paths";
+import { parseRouteKey, parseWebhookKey } from "../../src/paths";
 
 describe("parseRouteKey", () => {
 	it("parses simple GET route", () => {
@@ -98,5 +98,30 @@ describe("parseRouteKey", () => {
 			path: "/api/v1/users/{id}/settings",
 			pathParams: ["id"],
 		});
+	});
+});
+
+describe("parseWebhookKey", () => {
+	it("parses simple POST webhook", () => {
+		const result = parseWebhookKey("POST orderCreated");
+		expect(result).toEqual({ method: "post", name: "orderCreated" });
+	});
+
+	it("parses case-insensitive method", () => {
+		const result = parseWebhookKey("post orderCreated");
+		expect(result).toEqual({ method: "post", name: "orderCreated" });
+	});
+
+	it("allows names without leading slash", () => {
+		const result = parseWebhookKey("POST newUser");
+		expect(result).toEqual({ method: "post", name: "newUser" });
+	});
+
+	it("throws on missing method", () => {
+		expect(() => parseWebhookKey("orderCreated")).toThrow(ToOpenapiError);
+	});
+
+	it("throws on invalid method", () => {
+		expect(() => parseWebhookKey("FETCH orderCreated")).toThrow(ToOpenapiError);
 	});
 });

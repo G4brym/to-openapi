@@ -93,6 +93,29 @@ api.route('get', '/users/{id}', {
 })
 ```
 
+### `.webhook(method, name, definition)`
+
+```ts
+webhook(method: HttpMethod, name: string, definition: RouteShorthand): this
+```
+
+Adds a webhook to the API. Returns `this` for chaining. Webhooks are only supported in OpenAPI 3.1.0 — calling `.document()` with webhooks registered under `openapi: "3.0.3"` throws a `ToOpenapiError`.
+
+**Parameters:**
+
+- `method` -- the HTTP method for the webhook callback.
+- `name` -- the webhook event name (e.g. `"orderCreated"`).
+- `definition` -- a `RouteShorthand` object describing the webhook operation.
+
+**Example:**
+
+```ts
+api.webhook('post', 'orderCreated', {
+  body: OrderSchema,
+  200: null,
+})
+```
+
 ### `.document()`
 
 ```ts

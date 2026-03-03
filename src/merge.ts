@@ -84,6 +84,43 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 		components.securitySchemes = securitySchemes as ComponentsObject["securitySchemes"];
 	}
 
+	const webhooks: Record<string, PathItemObject> = { ...(base.webhooks ?? {}) };
+
+	for (const source of sources) {
+		if (source.webhooks) {
+			for (const [name, pathItem] of Object.entries(source.webhooks)) {
+				if (!webhooks[name]) {
+					webhooks[name] = { ...pathItem };
+					continue;
+				}
+
+				// biome-ignore lint/style/noNonNullAssertion: name is guaranteed to exist from the check above
+				const existing = webhooks[name]!;
+				const methods = [
+					"get",
+					"post",
+					"put",
+					"patch",
+					"delete",
+					"head",
+					"options",
+					"trace",
+				] as const;
+				for (const method of methods) {
+					if (pathItem[method]) {
+						if (existing[method]) {
+							throw new ToOpenapiError(
+								"DUPLICATE_PATH",
+								`Duplicate webhook operation: ${method.toUpperCase()} ${name}`,
+							);
+						}
+						(existing as Record<string, unknown>)[method] = pathItem[method];
+					}
+				}
+			}
+		}
+	}
+
 	const tags = tagsByName.size > 0 ? Array.from(tagsByName.values()) : undefined;
 
 	const doc: OpenAPIDocument = {
@@ -124,6 +161,10 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 
 	if (base.externalDocs) {
 		doc.externalDocs = base.externalDocs;
+	}
+
+	if (Object.keys(webhooks).length > 0) {
+		doc.webhooks = webhooks;
 	}
 
 	return doc;

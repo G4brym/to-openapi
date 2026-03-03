@@ -1,5 +1,6 @@
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { assembleDocument } from "./assembler.js";
+import { ToOpenapiError } from "./errors.js";
 import { extractPathParams } from "./paths.js";
 import { SchemaResolver } from "./resolver.js";
 import { expandRoute } from "./shorthand.js";
@@ -21,6 +22,7 @@ export class OpenAPI {
 	private readonly resolver: SchemaResolver;
 	private readonly plugins: ToOpenapiPlugin[];
 	private readonly routes: { method: HttpMethod; path: string; definition: RouteShorthand }[] = [];
+	private readonly webhookEntries: { method: HttpMethod; name: string; definition: RouteShorthand }[] = [];
 
 	constructor(options: OpenAPIOptions) {
 		this.options = options;
@@ -36,6 +38,11 @@ export class OpenAPI {
 
 	route(method: HttpMethod, path: string, definition: RouteShorthand): this {
 		this.routes.push({ method, path: normalizePath(path), definition });
+		return this;
+	}
+
+	webhook(method: HttpMethod, name: string, definition: RouteShorthand): this {
+		this.webhookEntries.push({ method, name, definition });
 		return this;
 	}
 
@@ -61,6 +68,37 @@ export class OpenAPI {
 			assembled.push({ method: finalParsed.method, path: routeDef.path, operation });
 		}
 
+		let webhookOps: { method: HttpMethod; name: string; operation: OperationObject }[] | undefined;
+
+		if (this.webhookEntries.length > 0) {
+			if (this.openapiVersion !== "3.1.0") {
+				throw new ToOpenapiError(
+					"INVALID_DEFINITION",
+					"Webhooks are only supported in OpenAPI 3.1.0",
+				);
+			}
+
+			webhookOps = [];
+			for (const webhook of this.webhookEntries) {
+				let routeDef: RouteDefinition = {
+					...webhook.definition,
+					method: webhook.method,
+					path: `/${webhook.name}`,
+				};
+
+				routeDef = this.runTransformRoute(routeDef);
+
+				const finalParsed: ParsedRoute = {
+					method: webhook.method,
+					path: routeDef.path,
+					pathParams: [],
+				};
+
+				const operation = expandRoute(finalParsed, routeDef, this.resolver, this.plugins);
+				webhookOps.push({ method: webhook.method, name: webhook.name, operation });
+			}
+		}
+
 		let doc = assembleDocument(
 			{
 				info: this.options.info,
@@ -73,6 +111,7 @@ export class OpenAPI {
 			},
 			assembled,
 			this.resolver,
+			webhookOps,
 		);
 
 		doc = this.runTransformDocument(doc);

@@ -66,6 +66,34 @@ export function parseRouteKey(key: string): ParsedRoute {
 	};
 }
 
+export function parseWebhookKey(key: string): { method: HttpMethod; name: string } {
+	const trimmed = key.trim();
+	const spaceIndex = trimmed.search(/\s+/);
+
+	if (spaceIndex === -1) {
+		throw new ToOpenapiError(
+			"INVALID_ROUTE_KEY",
+			`Invalid webhook key "${key}": expected "METHOD eventName" format`,
+		);
+	}
+
+	const rawMethod = trimmed.slice(0, spaceIndex);
+	const name = trimmed.slice(spaceIndex).trim();
+
+	const method = rawMethod.toLowerCase();
+	if (!VALID_METHODS.has(method)) {
+		throw new ToOpenapiError(
+			"INVALID_ROUTE_KEY",
+			`Invalid HTTP method "${rawMethod}" in webhook key "${key}"`,
+		);
+	}
+
+	return {
+		method: method as HttpMethod,
+		name,
+	};
+}
+
 export function extractPathParams(path: string): string[] {
 	const params: string[] = [];
 	const regex = /\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g;

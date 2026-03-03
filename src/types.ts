@@ -171,6 +171,7 @@ export interface OpenAPIDocument {
 	info: InfoObject;
 	servers?: ServerObject[];
 	paths: Record<string, PathItemObject>;
+	webhooks?: Record<string, PathItemObject>;
 	components?: ComponentsObject;
 	security?: SecurityRequirementObject[];
 	tags?: TagObject[];
@@ -229,6 +230,7 @@ export interface ToOpenapiPlugin {
 export interface ToOpenapiDefinition {
 	info: InfoObject;
 	paths: Record<string, RouteShorthand>;
+	webhooks?: Record<string, RouteShorthand>;
 	schemas?: Record<string, StandardJSONSchemaV1>;
 	plugins?: ToOpenapiPlugin[];
 	openapi?: "3.0.3" | "3.1.0";
@@ -249,5 +251,6 @@ export interface OpenAPIOptions {
 	securitySchemes?: Record<string, SecuritySchemeObject>;
 	tags?: TagObject[];
 	externalDocs?: ExternalDocsObject;
+	webhooks?: Record<string, RouteShorthand>;
 	plugins?: ToOpenapiPlugin[];
 }

@@ -25,6 +25,7 @@ export function assembleDocument(
 	options: AssembleInput,
 	routes: { method: HttpMethod; path: string; operation: OperationObject }[],
 	resolver: SchemaResolver,
+	webhooks?: { method: HttpMethod; name: string; operation: OperationObject }[],
 ): OpenAPIDocument {
 	const paths: Record<string, PathItemObject> = {};
 
@@ -80,6 +81,25 @@ export function assembleDocument(
 
 	if (options.externalDocs) {
 		doc.externalDocs = options.externalDocs;
+	}
+
+	if (webhooks && webhooks.length > 0) {
+		const webhookPaths: Record<string, PathItemObject> = {};
+		for (const webhook of webhooks) {
+			if (!webhookPaths[webhook.name]) {
+				webhookPaths[webhook.name] = {};
+			}
+			// biome-ignore lint/style/noNonNullAssertion: name is guaranteed to exist from the check above
+			const pathItem = webhookPaths[webhook.name]!;
+			if (pathItem[webhook.method]) {
+				throw new ToOpenapiError(
+					"DUPLICATE_PATH",
+					`Duplicate webhook operation: ${webhook.method.toUpperCase()} ${webhook.name}`,
+				);
+			}
+			pathItem[webhook.method] = webhook.operation;
+		}
+		doc.webhooks = webhookPaths;
 	}
 
 	return doc;

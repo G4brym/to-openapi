@@ -128,6 +128,43 @@ describe("OpenAPI class", () => {
 		expect(params?.[0]?.in).toBe("path");
 	});
 
+	it("adds webhooks via .webhook()", async () => {
+		const doc = new OpenAPI({ info: { title: "Test", version: "1.0.0" } })
+			.webhook("post", "orderCreated", {
+				body: createMockSchema({ type: "object", properties: { orderId: { type: "string" } } }),
+				200: null,
+			})
+			.document();
+
+		expect(doc.webhooks).toBeDefined();
+		expect(doc.webhooks?.orderCreated?.post).toBeDefined();
+		expect(doc.webhooks?.orderCreated?.post?.responses?.["200"]).toEqual({
+			description: "Successful response",
+		});
+		await assertValidOpenAPI(doc);
+	});
+
+	it("supports webhook chaining with routes", async () => {
+		const doc = new OpenAPI({ info: { title: "Test", version: "1.0.0" } })
+			.route("get", "/tasks", { 200: null })
+			.webhook("post", "taskCreated", { 200: null })
+			.document();
+
+		expect(doc.paths["/tasks"]?.get).toBeDefined();
+		expect(doc.webhooks?.taskCreated?.post).toBeDefined();
+		await assertValidOpenAPI(doc);
+	});
+
+	it("throws when webhooks used with OpenAPI 3.0.3", () => {
+		const api = new OpenAPI({
+			info: { title: "Test", version: "1.0.0" },
+			openapi: "3.0.3",
+		});
+		api.webhook("post", "orderCreated", { 200: null });
+
+		expect(() => api.document()).toThrow("Webhooks are only supported in OpenAPI 3.1.0");
+	});
+
 	describe("equivalence with openapi()", () => {
 		it("produces equivalent output for same input", async () => {
 			const taskSchema = createMockSchema({

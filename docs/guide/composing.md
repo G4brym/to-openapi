@@ -64,6 +64,10 @@ Tags are merged by name. If the same tag name appears in multiple documents, onl
 merge(base, source)
 ```
 
+### Webhooks
+
+Webhooks are merged using the same rules as paths — webhook event names are combined, and duplicate method+name combinations throw a `DUPLICATE_PATH` error.
+
 ### Servers and Security
 
 The base document's `servers` and `security` arrays are used. If the base has no `servers`, the first source with `servers` provides them. Same for `security`.

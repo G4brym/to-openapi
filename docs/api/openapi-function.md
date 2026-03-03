@@ -24,6 +24,7 @@ A single object describing the entire API. The full interface is:
 interface ToOpenapiDefinition {
   info: InfoObject
   paths: Record<string, RouteShorthand>
+  webhooks?: Record<string, RouteShorthand>
   schemas?: Record<string, StandardJSONSchemaV1>
   plugins?: ToOpenapiPlugin[]
   openapi?: "3.0.3" | "3.1.0"
@@ -82,6 +83,21 @@ An object whose keys are route keys in the format `"METHOD /path"` and whose val
 ```
 
 See the [Types reference](./types.md) for the full `RouteShorthand` interface.
+
+#### `webhooks` (optional)
+
+Type: `Record<string, RouteShorthand>`
+
+An object whose keys are webhook keys in the format `"METHOD eventName"` and whose values are route shorthand definitions. Webhooks are only supported in OpenAPI 3.1.0 — providing webhooks with `openapi: "3.0.3"` throws a `ToOpenapiError` with code `INVALID_DEFINITION`.
+
+```ts
+{
+  webhooks: {
+    "POST orderCreated": { body: OrderSchema, 200: null },
+    "POST orderCancelled": { body: OrderSchema, 200: null },
+  }
+}
+```
 
 #### `schemas` (optional)
 

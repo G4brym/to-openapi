@@ -274,6 +274,35 @@ describe("openapi()", () => {
 		await assertValidOpenAPI(doc);
 	});
 
+	it("expands webhooks into document", async () => {
+		const doc = openapi({
+			...baseDefinition,
+			webhooks: {
+				"POST orderCreated": {
+					body: createMockSchema({ type: "object", properties: { orderId: { type: "string" } } }),
+					200: null,
+				},
+			},
+		});
+
+		expect(doc.webhooks).toBeDefined();
+		expect(doc.webhooks?.orderCreated?.post).toBeDefined();
+		expect(doc.webhooks?.orderCreated?.post?.requestBody).toBeDefined();
+		await assertValidOpenAPI(doc);
+	});
+
+	it("throws when webhooks used with OpenAPI 3.0.3", () => {
+		expect(() =>
+			openapi({
+				...baseDefinition,
+				openapi: "3.0.3",
+				webhooks: {
+					"POST orderCreated": { 200: null },
+				},
+			}),
+		).toThrow("Webhooks are only supported in OpenAPI 3.1.0");
+	});
+
 	it("runs transformSchema on body and response schemas", () => {
 		const stripInternal: ToOpenapiPlugin = {
 			name: "strip-internal",

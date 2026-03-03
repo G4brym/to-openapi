@@ -1,6 +1,7 @@
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { assembleDocument } from "./assembler.js";
-import { extractPathParams, parseRouteKey } from "./paths.js";
+import { ToOpenapiError } from "./errors.js";
+import { extractPathParams, parseRouteKey, parseWebhookKey } from "./paths.js";
 import { SchemaResolver } from "./resolver.js";
 import { expandRoute } from "./shorthand.js";
 import type {
@@ -53,6 +54,40 @@ export function openapi(definition: ToOpenapiDefinition): OpenAPIDocument {
 		});
 	}
 
+	let webhookOps: { method: HttpMethod; name: string; operation: OperationObject }[] | undefined;
+
+	if (definition.webhooks) {
+		if (openapiVersion !== "3.1.0") {
+			throw new ToOpenapiError(
+				"INVALID_DEFINITION",
+				"Webhooks are only supported in OpenAPI 3.1.0",
+			);
+		}
+
+		webhookOps = [];
+		for (const [key, shorthand] of Object.entries(definition.webhooks)) {
+			const { method, name } = parseWebhookKey(key);
+
+			let routeDef: RouteDefinition = {
+				...shorthand,
+				method,
+				path: `/${name}`,
+			};
+
+			routeDef = runTransformRoute(plugins, routeDef);
+
+			const finalParsed: ParsedRoute = {
+				method,
+				path: routeDef.path,
+				pathParams: [],
+			};
+
+			const operation = expandRoute(finalParsed, routeDef, resolver, plugins);
+
+			webhookOps.push({ method, name, operation });
+		}
+	}
+
 	let doc = assembleDocument(
 		{
 			info: definition.info,
@@ -65,6 +100,7 @@ export function openapi(definition: ToOpenapiDefinition): OpenAPIDocument {
 		},
 		routes,
 		resolver,
+		webhookOps,
 	);
 
 	doc = runTransformDocument(plugins, doc);

@@ -203,6 +203,27 @@ describe("full pipeline", () => {
 		await assertValidOpenAPI(doc);
 	});
 
+	it("webhooks with plugins in full pipeline", async () => {
+		const doc = openapi({
+			info: { title: "Webhook Test", version: "1.0.0" },
+			plugins: [bearerAuth()],
+			paths: {
+				"GET /tasks": { 200: null },
+			},
+			webhooks: {
+				"POST taskCreated": {
+					body: createMockSchema({ type: "object", properties: { taskId: { type: "string" } } }),
+					200: null,
+				},
+			},
+		});
+
+		expect(doc.webhooks?.taskCreated?.post).toBeDefined();
+		expect(doc.webhooks?.taskCreated?.post?.security).toEqual([{ bearerAuth: [] }]);
+		expect(doc.paths["/tasks"]?.get).toBeDefined();
+		await assertValidOpenAPI(doc);
+	});
+
 	it("bearerAuth exclude works in full pipeline", async () => {
 		const doc = openapi({
 			info: { title: "Exclude Test", version: "1.0.0" },

@@ -148,4 +148,49 @@ describe("merge", () => {
 		const result = merge(base, source);
 		expect(result.externalDocs?.url).toBe("https://docs.base.com");
 	});
+
+	it("merges webhooks from multiple documents", () => {
+		const base = makeDoc({
+			webhooks: { orderCreated: { post: { operationId: "orderCreated" } } },
+		});
+		const source = makeDoc({
+			webhooks: { userSignedUp: { post: { operationId: "userSignedUp" } } },
+		});
+
+		const result = merge(base, source);
+		expect(result.webhooks?.orderCreated?.post).toBeDefined();
+		expect(result.webhooks?.userSignedUp?.post).toBeDefined();
+	});
+
+	it("throws on duplicate webhook operations", () => {
+		const base = makeDoc({
+			webhooks: { orderCreated: { post: { operationId: "orderCreated" } } },
+		});
+		const source = makeDoc({
+			webhooks: { orderCreated: { post: { operationId: "orderCreated2" } } },
+		});
+
+		expect(() => merge(base, source)).toThrow(ToOpenapiError);
+	});
+
+	it("merges different methods on same webhook name", () => {
+		const base = makeDoc({
+			webhooks: { order: { post: { operationId: "orderPost" } } },
+		});
+		const source = makeDoc({
+			webhooks: { order: { get: { operationId: "orderGet" } } },
+		});
+
+		const result = merge(base, source);
+		expect(result.webhooks?.order?.post).toBeDefined();
+		expect(result.webhooks?.order?.get).toBeDefined();
+	});
+
+	it("omits webhooks when none present", () => {
+		const base = makeDoc();
+		const source = makeDoc();
+
+		const result = merge(base, source);
+		expect(result.webhooks).toBeUndefined();
+	});
 });
