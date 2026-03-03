@@ -1,6 +1,6 @@
 # Request Parameters
 
-to-openapi supports three kinds of request parameters: query, path, and header. Each is defined by providing an object schema whose properties become individual parameters.
+to-openapi supports four kinds of request parameters: query, path, header, and cookie. Each is defined by providing an object schema whose properties become individual parameters.
 
 ## Query Parameters
 
@@ -85,6 +85,22 @@ Provide an object schema to `headers`. Each property becomes a header parameter.
 
 This produces two header parameters: `x-api-key` (required) and `x-request-id` (optional).
 
+## Cookie Parameters
+
+Provide an object schema to `cookies`. Each property becomes a cookie parameter.
+
+```ts
+'GET /dashboard': {
+  cookies: z.object({
+    session_id: z.string(),
+    theme: z.string().optional(),
+  }),
+  200: DashboardSchema,
+}
+```
+
+This produces two cookie parameters: `session_id` (required) and `theme` (optional).
+
 ## Required Fields
 
 Whether a parameter is required depends on its presence in the JSON Schema `required` array:
@@ -92,6 +108,7 @@ Whether a parameter is required depends on its presence in the JSON Schema `requ
 - **Query parameters**: required if listed in the schema's `required` array; optional otherwise.
 - **Path parameters**: always `required: true`, regardless of the schema.
 - **Header parameters**: required if listed in the schema's `required` array; optional otherwise.
+- **Cookie parameters**: required if listed in the schema's `required` array; optional otherwise.
 
 In Zod, calling `.optional()` on a property removes it from the `required` array. Other schema libraries have equivalent mechanisms.
 
@@ -126,6 +143,9 @@ const doc = openapi({
       headers: z.object({
         'x-idempotency-key': z.string(),
       }),
+      cookies: z.object({
+        session_id: z.string(),
+      }),
       body: UpdateUserBody,
       200: UserSchema,
       400: null,
@@ -139,6 +159,7 @@ This produces:
 - Two path parameters: `orgId` and `userId` (both UUID, both required)
 - One query parameter: `dryRun` (optional boolean)
 - One header parameter: `x-idempotency-key` (required string)
+- One cookie parameter: `session_id` (required string)
 - A JSON request body with the `UpdateUserBody` schema
 - Two responses: 200 with the User schema, 400 with no body
 

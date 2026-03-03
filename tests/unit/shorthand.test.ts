@@ -292,20 +292,66 @@ describe("expandRoute", () => {
 		});
 	});
 
+	describe("cookie parameters", () => {
+		it("expands cookies schema into cookie parameters", () => {
+			const resolver = makeResolver();
+			const cookies = createMockObjectSchema(
+				{ session: { type: "string" }, theme: { type: "string" } },
+				["session"],
+			);
+			const op = expandRoute(makeParsed(), { cookies }, resolver);
+
+			expect(op.parameters).toHaveLength(2);
+			expect(op.parameters?.[0]).toEqual({
+				name: "session",
+				in: "cookie",
+				schema: { type: "string" },
+				required: true,
+			});
+			expect(op.parameters?.[1]).toEqual({
+				name: "theme",
+				in: "cookie",
+				schema: { type: "string" },
+			});
+		});
+
+		it("marks optional cookie params without required", () => {
+			const resolver = makeResolver();
+			const cookies = createMockObjectSchema({ preference: { type: "string" } });
+			const op = expandRoute(makeParsed(), { cookies }, resolver);
+
+			expect(op.parameters?.[0]?.required).toBeUndefined();
+		});
+
+		it("combines cookie and query parameters", () => {
+			const resolver = makeResolver();
+			const query = createMockObjectSchema({ page: { type: "integer" } });
+			const cookies = createMockObjectSchema({ session: { type: "string" } });
+			const op = expandRoute(makeParsed(), { query, cookies }, resolver);
+
+			expect(op.parameters).toHaveLength(2);
+			const types = op.parameters?.map((p) => p.in);
+			expect(types).toContain("query");
+			expect(types).toContain("cookie");
+		});
+	});
+
 	describe("combined parameters", () => {
-		it("combines query, path, and header parameters", () => {
+		it("combines query, path, header, and cookie parameters", () => {
 			const resolver = makeResolver();
 			const query = createMockObjectSchema({ page: { type: "integer" } });
 			const headers = createMockObjectSchema({ "x-token": { type: "string" } });
+			const cookies = createMockObjectSchema({ session: { type: "string" } });
 			const parsed = makeParsed({ path: "/items/{id}", pathParams: ["id"] });
 
-			const op = expandRoute(parsed, { query, headers }, resolver);
+			const op = expandRoute(parsed, { query, headers, cookies }, resolver);
 
-			expect(op.parameters).toHaveLength(3);
+			expect(op.parameters).toHaveLength(4);
 			const types = op.parameters?.map((p) => p.in);
 			expect(types).toContain("query");
 			expect(types).toContain("path");
 			expect(types).toContain("header");
+			expect(types).toContain("cookie");
 		});
 	});
 });

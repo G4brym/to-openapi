@@ -157,6 +157,7 @@ export interface RouteShorthand {
 	query?: StandardJSONSchemaV1;
 	params?: StandardJSONSchemaV1;
 	headers?: StandardJSONSchemaV1;
+	cookies?: StandardJSONSchemaV1;
 	body?: StandardJSONSchemaV1 | RequestBodyObject;
 	summary?: string;
 	description?: string;

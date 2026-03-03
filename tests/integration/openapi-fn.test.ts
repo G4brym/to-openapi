@@ -175,6 +175,30 @@ describe("openapi()", () => {
 		await assertValidOpenAPI(doc);
 	});
 
+	it("expands cookie parameters into valid document", async () => {
+		const doc = openapi({
+			...baseDefinition,
+			paths: {
+				"GET /tasks": {
+					cookies: createMockObjectSchema(
+						{ session: { type: "string" } },
+						["session"],
+					),
+					200: createMockSchema({ type: "array" }),
+				},
+			},
+		});
+
+		const getOp = doc.paths["/tasks"]?.get;
+		expect(getOp?.parameters).toHaveLength(1);
+		expect(getOp?.parameters?.[0]).toMatchObject({
+			name: "session",
+			in: "cookie",
+			required: true,
+		});
+		await assertValidOpenAPI(doc);
+	});
+
 	it("runs transformSchema on body and response schemas", () => {
 		const stripInternal: ToOpenapiPlugin = {
 			name: "strip-internal",

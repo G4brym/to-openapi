@@ -51,6 +51,10 @@ export function expandRoute(
 		expandHeaderParams(definition.headers, parameters, resolver);
 	}
 
+	if (definition.cookies) {
+		expandCookieParams(definition.cookies, parameters, resolver);
+	}
+
 	if (parameters.length > 0) {
 		operation.parameters = parameters;
 	}
@@ -159,6 +163,30 @@ function expandHeaderParams(
 		const param: ParameterObject = {
 			name,
 			in: "header",
+			schema: propSchema as SchemaOrRef,
+		};
+		if (required.has(name)) {
+			param.required = true;
+		}
+		parameters.push(param);
+	}
+}
+
+function expandCookieParams(
+	schema: StandardJSONSchemaV1,
+	parameters: ParameterObject[],
+	resolver: SchemaResolver,
+): void {
+	const resolved = resolver.resolveInline(schema);
+	const properties = resolved.properties as Record<string, unknown> | undefined;
+	if (!properties) return;
+
+	const required = new Set((resolved.required as string[] | undefined) ?? []);
+
+	for (const [name, propSchema] of Object.entries(properties)) {
+		const param: ParameterObject = {
+			name,
+			in: "cookie",
 			schema: propSchema as SchemaOrRef,
 		};
 		if (required.has(name)) {

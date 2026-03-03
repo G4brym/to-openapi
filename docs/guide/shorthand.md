@@ -55,6 +55,7 @@ The `RouteShorthand` interface accepts the following fields:
 | `query` | Standard Schema | Object schema; each property becomes a query parameter |
 | `params` | Standard Schema | Object schema; each property becomes a path parameter |
 | `headers` | Standard Schema | Object schema; each property becomes a header parameter |
+| `cookies` | Standard Schema | Object schema; each property becomes a cookie parameter |
 | `body` | Standard Schema or `RequestBodyObject` | Request body schema (wrapped in `application/json`) or full OpenAPI RequestBodyObject |
 | `summary` | `string` | Short summary of the operation |
 | `description` | `string` | Detailed description of the operation |
@@ -130,6 +131,6 @@ When `operationId` is not provided, one is generated from the method and path:
 
 ## Related
 
-- [Request Parameters](/guide/request-params) -- details on query, path, and header parameters
+- [Request Parameters](/guide/request-params) -- details on query, path, header, and cookie parameters
 - [Responses](/guide/responses) -- all response definition styles
 - [Schemas & $ref](/guide/schemas) -- how schemas are resolved
