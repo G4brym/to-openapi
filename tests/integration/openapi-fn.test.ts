@@ -330,6 +330,83 @@ describe("openapi()", () => {
 		).toThrow("Duplicate operation");
 	});
 
+	describe("misuse and bad configuration", () => {
+		it("GET with body produces document with requestBody on GET operation", async () => {
+			const doc = openapi({
+				...baseDefinition,
+				paths: {
+					"GET /tasks": {
+						body: createMockSchema({ type: "object" }),
+						200: null,
+					},
+				},
+			});
+
+			const getOp = doc.paths["/tasks"]?.get;
+			expect(getOp?.requestBody).toBeDefined();
+			// OpenAPI allows body on GET but it's unusual — validator may still accept
+		});
+
+		it("unknown schema name reference throws SCHEMA_RESOLUTION_FAILED", () => {
+			expect(() =>
+				openapi({
+					...baseDefinition,
+					paths: {
+						"GET /tasks": { 200: "NonExistent" as any },
+					},
+				}),
+			).toThrow("NonExistent");
+		});
+
+		it("plugin replacing entire document still gets frozen", () => {
+			const replacer: ToOpenapiPlugin = {
+				name: "replacer",
+				transformDocument: () => ({
+					openapi: "3.1.0",
+					info: { title: "Replaced", version: "2.0.0" },
+					paths: {},
+				}),
+			};
+
+			const doc = openapi({
+				...baseDefinition,
+				plugins: [replacer],
+				paths: {},
+			});
+
+			expect(doc.info.title).toBe("Replaced");
+			expect(Object.isFrozen(doc)).toBe(true);
+			expect(Object.isFrozen(doc.info)).toBe(true);
+		});
+
+		it("empty info title and version are accepted without validation", async () => {
+			const doc = openapi({
+				info: { title: "", version: "" },
+				paths: {},
+			});
+
+			expect(doc.info.title).toBe("");
+			expect(doc.info.version).toBe("");
+		});
+
+		it("route with only metadata and no responses produces operation without responses key", () => {
+			const doc = openapi({
+				...baseDefinition,
+				paths: {
+					"GET /test": {
+						summary: "A test",
+						tags: ["test"],
+					},
+				},
+			});
+
+			const op = doc.paths["/test"]?.get;
+			expect(op?.summary).toBe("A test");
+			expect(op?.tags).toEqual(["test"]);
+			expect(op?.responses).toBeUndefined();
+		});
+	});
+
 	it("runs transformSchema on body and response schemas", () => {
 		const stripInternal: ToOpenapiPlugin = {
 			name: "strip-internal",

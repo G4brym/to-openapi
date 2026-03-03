@@ -730,6 +730,54 @@ describe("expandRoute", () => {
 		});
 	});
 
+	describe("misuse and bad configuration", () => {
+		it("GET request with body is accepted and produces requestBody", () => {
+			const resolver = makeResolver();
+			const body = createMockSchema({ type: "object", properties: { name: { type: "string" } } });
+			const op = expandRoute(makeParsed({ method: "get" }), { body }, resolver);
+
+			expect(op.requestBody).toBeDefined();
+			expect((op.requestBody as any)?.content?.["application/json"]).toBeDefined();
+		});
+
+		it("non-numeric status code key is silently skipped", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { abc: null } as any, resolver);
+
+			expect(op.responses).toBeUndefined();
+		});
+
+		it("float status code key is silently skipped", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { "200.5": null } as any, resolver);
+
+			expect(op.responses).toBeUndefined();
+		});
+
+		it("response with both schema and content keys is silently skipped", () => {
+			const resolver = makeResolver();
+			const value = {
+				schema: createMockSchema({ type: "object" }),
+				content: { "text/plain": { schema: { type: "string" } } },
+				description: "ambiguous",
+			};
+			const op = expandRoute(makeParsed(), { 200: value } as any, resolver);
+
+			// Neither isResponseShorthandObject (has "content") nor isFullResponseObject (has "schema") match
+			expect(op.responses?.["200"]).toBeUndefined();
+		});
+
+		it("route with only metadata and no responses produces operation without responses", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { summary: "Test", tags: ["test"] }, resolver);
+
+			expect(op.responses).toBeUndefined();
+			expect(op.summary).toBe("Test");
+			expect(op.tags).toEqual(["test"]);
+			expect(op.operationId).toBeDefined();
+		});
+	});
+
 	describe("combined parameters", () => {
 		it("combines query, path, header, and cookie parameters", () => {
 			const resolver = makeResolver();

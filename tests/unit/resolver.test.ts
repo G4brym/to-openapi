@@ -284,6 +284,71 @@ describe("SchemaResolver", () => {
 		}
 	});
 
+	describe("misuse and bad configuration", () => {
+		it("empty string name creates component with empty key", () => {
+			const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+			const schema = createMockSchema({ type: "string" });
+			resolver.registerNamed("", schema);
+
+			const result = resolver.resolve("");
+			expect(result).toEqual({ $ref: "#/components/schemas/" });
+
+			const components = resolver.getComponents();
+			expect(components[""]).toEqual({ type: "string" });
+		});
+
+		it("same name with different schemas silently overwrites (last wins)", () => {
+			const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+			const s1 = createMockSchema({ type: "string" });
+			const s2 = createMockSchema({ type: "number" });
+			resolver.registerNamed("Task", s1);
+			resolver.registerNamed("Task", s2);
+
+			resolver.resolve("Task");
+			const components = resolver.getComponents();
+			expect(components.Task).toEqual({ type: "number" });
+		});
+
+		it("schema input() returning null is accepted without validation", () => {
+			const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+			const schema = {
+				"~standard": {
+					version: 1 as const,
+					vendor: "test",
+					jsonSchema: {
+						input: () => null as any,
+						output: () => null as any,
+					},
+				},
+			};
+
+			const result = resolver.resolve(schema);
+			expect(result).toBeNull();
+		});
+
+		it("plain object without ~standard throws SCHEMA_RESOLUTION_FAILED", () => {
+			const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+			const notASchema = { type: "object" } as any;
+
+			expect(() => resolver.resolve(notASchema)).toThrow(ToOpenapiError);
+			try {
+				const resolver2 = new SchemaResolver({ openapiVersion: "3.1.0" });
+				resolver2.resolve(notASchema);
+			} catch (err) {
+				expect((err as ToOpenapiError).code).toBe("SCHEMA_RESOLUTION_FAILED");
+			}
+		});
+
+		it("schema name with slash creates potentially invalid $ref path", () => {
+			const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+			const schema = createMockSchema({ type: "string" });
+			resolver.registerNamed("my/schema", schema);
+
+			const result = resolver.resolve("my/schema");
+			expect(result).toEqual({ $ref: "#/components/schemas/my/schema" });
+		});
+	});
+
 	it("disambiguates when vendor name collides with existing named schema", () => {
 		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
 		// Pre-register a schema with the name that auto-naming would generate

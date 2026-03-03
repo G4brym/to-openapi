@@ -189,6 +189,62 @@ describe("OpenAPI class", () => {
 		expect(doc.webhooks?.[""]?.post).toBeDefined();
 	});
 
+	describe("misuse and bad configuration", () => {
+		it("calling document() twice produces consistent output", () => {
+			const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
+			api.route("get", "/tasks", { 200: null });
+
+			const doc1 = api.document();
+			const doc2 = api.document();
+
+			expect(JSON.stringify(doc1)).toBe(JSON.stringify(doc2));
+		});
+
+		it("route added after document() is included in second call", () => {
+			const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
+			api.route("get", "/tasks", { 200: null });
+
+			const doc1 = api.document();
+			expect(doc1.paths["/users"]).toBeUndefined();
+
+			api.route("get", "/users", { 200: null });
+			const doc2 = api.document();
+			expect(doc2.paths["/users"]?.get).toBeDefined();
+			expect(doc2.paths["/tasks"]?.get).toBeDefined();
+		});
+
+		it("schema registered after first document() is seen in second call", () => {
+			const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
+			api.route("get", "/tasks", { 200: null });
+
+			const doc1 = api.document();
+			expect(doc1.components?.schemas?.Task).toBeUndefined();
+
+			api.schema("Task", createMockSchema({ type: "object" }));
+			api.route("get", "/tasks/:id", { 200: "Task" as any });
+			const doc2 = api.document();
+			expect(doc2.components?.schemas?.Task).toBeDefined();
+		});
+
+		it("mutating frozen output throws TypeError", () => {
+			const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
+			api.route("get", "/tasks", { 200: null });
+			const doc = api.document();
+
+			expect(() => {
+				(doc.paths as any)["/new"] = {};
+			}).toThrow(TypeError);
+		});
+
+		it("invalid HTTP method string is accepted by assembler", () => {
+			const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
+			api.route("invalid" as any, "/test", { 200: null });
+
+			const doc = api.document();
+			expect((doc.paths["/test"] as any)?.invalid).toBeDefined();
+		});
+	});
+
 	describe("equivalence with openapi()", () => {
 		it("produces equivalent output for same input", async () => {
 			const taskSchema = createMockSchema({

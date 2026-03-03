@@ -122,6 +122,29 @@ describe("parseRouteKey", () => {
 		});
 	});
 
+	describe("misuse and bad input", () => {
+		it("trailing space only after method throws INVALID_ROUTE_KEY", () => {
+			expect(() => parseRouteKey("GET ")).toThrow(ToOpenapiError);
+			try {
+				parseRouteKey("GET ");
+			} catch (err) {
+				expect((err as ToOpenapiError).code).toBe("INVALID_ROUTE_KEY");
+			}
+		});
+
+		it("URL-encoded param braces are not captured as params", () => {
+			const result = parseRouteKey("GET /users/%7Bid%7D");
+			expect(result.pathParams).toEqual([]);
+			expect(result.path).toBe("/users/%7Bid%7D");
+		});
+
+		it("numeric-start param name is not captured by regex", () => {
+			const result = parseRouteKey("GET /items/{123}");
+			expect(result.pathParams).toEqual([]);
+			expect(result.path).toBe("/items/{123}");
+		});
+	});
+
 	describe("path preservation", () => {
 		it("dots in path segments are preserved", () => {
 			const result = parseRouteKey("GET /api/v1.0/users");
@@ -162,5 +185,10 @@ describe("parseWebhookKey", () => {
 	it("handles extra whitespace between method and name", () => {
 		const result = parseWebhookKey("POST   orderCreated");
 		expect(result).toEqual({ method: "post", name: "orderCreated" });
+	});
+
+	it("webhook name with slash is accepted as the full name", () => {
+		const result = parseWebhookKey("POST /events/created");
+		expect(result).toEqual({ method: "post", name: "/events/created" });
 	});
 });

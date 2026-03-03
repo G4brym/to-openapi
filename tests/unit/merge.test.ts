@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ToOpenapiError } from "../../src/errors";
 import { merge } from "../../src/merge";
 import type { OpenAPIDocument } from "../../src/types";
+import { deepFreeze } from "../../src/utils";
 
 function makeDoc(overrides: Partial<OpenAPIDocument> = {}): OpenAPIDocument {
 	return {
@@ -284,5 +285,71 @@ describe("merge", () => {
 
 		const result = merge(base, source);
 		expect(result.webhooks).toBeUndefined();
+	});
+
+	describe("misuse and bad configuration", () => {
+		it("merge with no sources returns base structure", () => {
+			const base = makeDoc({
+				paths: { "/tasks": { get: { operationId: "get_tasks" } } },
+			});
+
+			const result = merge(base);
+			expect(result.paths["/tasks"]?.get).toBeDefined();
+			expect(result.info.title).toBe("Test");
+		});
+
+		it("merging docs with different openapi versions uses base version silently", () => {
+			const base = makeDoc({ openapi: "3.1.0" });
+			const source: OpenAPIDocument = {
+				openapi: "3.0.3" as any,
+				info: { title: "Source", version: "1.0.0" },
+				paths: { "/users": { get: { operationId: "get_users" } } },
+			};
+
+			const result = merge(base, source);
+			expect(result.openapi).toBe("3.1.0");
+			expect(result.paths["/users"]).toBeDefined();
+		});
+
+		it("source webhooks included even when base is 3.0.3 (no version check in merge)", () => {
+			const base: OpenAPIDocument = {
+				openapi: "3.0.3" as any,
+				info: { title: "Test", version: "1.0.0" },
+				paths: {},
+			};
+			const source = makeDoc({
+				webhooks: { orderCreated: { post: { operationId: "orderCreated" } } },
+			});
+
+			const result = merge(base, source);
+			expect(result.openapi).toBe("3.0.3");
+			expect(result.webhooks?.orderCreated?.post).toBeDefined();
+		});
+
+		it("frozen base with overlapping paths throws TypeError on mutation", () => {
+			// deepFreeze imported at top of file
+			const base = deepFreeze(makeDoc({
+				paths: { "/tasks": { get: { operationId: "get_tasks" } } },
+			}));
+			const source = makeDoc({
+				paths: { "/tasks": { post: { operationId: "post_tasks" } } },
+			});
+
+			expect(() => merge(base, source)).toThrow(TypeError);
+		});
+
+		it("frozen base with disjoint paths works fine", () => {
+			// deepFreeze imported at top of file
+			const base = deepFreeze(makeDoc({
+				paths: { "/tasks": { get: { operationId: "get_tasks" } } },
+			}));
+			const source = makeDoc({
+				paths: { "/users": { get: { operationId: "get_users" } } },
+			});
+
+			const result = merge(base, source);
+			expect(result.paths["/tasks"]?.get).toBeDefined();
+			expect(result.paths["/users"]?.get).toBeDefined();
+		});
 	});
 });
