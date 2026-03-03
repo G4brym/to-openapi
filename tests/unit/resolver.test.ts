@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { SchemaResolver } from "../../src/resolver";
 import { ToOpenapiError } from "../../src/errors";
-import { createMockSchema, createMockObjectSchema } from "../helpers/mock-schemas";
+import { SchemaResolver } from "../../src/resolver";
+import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
 
 describe("SchemaResolver", () => {
 	it("resolves a named schema to a $ref", () => {
@@ -174,10 +174,9 @@ describe("SchemaResolver", () => {
 
 	it("resolves object schemas correctly", () => {
 		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
-		const schema = createMockObjectSchema(
-			{ name: { type: "string" }, age: { type: "number" } },
-			["name"],
-		);
+		const schema = createMockObjectSchema({ name: { type: "string" }, age: { type: "number" } }, [
+			"name",
+		]);
 
 		const result = resolver.resolve(schema) as Record<string, unknown>;
 		expect(result.type).toBe("object");

@@ -1,4 +1,7 @@
-export function deepMerge<T extends Record<string, unknown>>(target: T, source: Record<string, unknown>): T {
+export function deepMerge<T extends Record<string, unknown>>(
+	target: T,
+	source: Record<string, unknown>,
+): T {
 	const result = { ...target } as Record<string, unknown>;
 
 	for (const key of Object.keys(source)) {
@@ -9,10 +12,7 @@ export function deepMerge<T extends Record<string, unknown>>(target: T, source: 
 			continue;
 		}
 
-		if (
-			isPlainObject(sourceVal) &&
-			isPlainObject(targetVal)
-		) {
+		if (isPlainObject(sourceVal) && isPlainObject(targetVal)) {
 			result[key] = deepMerge(
 				targetVal as Record<string, unknown>,
 				sourceVal as Record<string, unknown>,

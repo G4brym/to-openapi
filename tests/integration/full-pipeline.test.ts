@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { openapi } from "../../src/openapi-fn";
-import { OpenAPI } from "../../src/openapi-class";
-import { merge } from "../../src/merge";
 import { extend } from "../../src/extend";
-import { bearerAuth } from "../../src/plugins/bearer-auth";
+import { merge } from "../../src/merge";
+import { OpenAPI } from "../../src/openapi-class";
+import { openapi } from "../../src/openapi-fn";
 import { autoTags } from "../../src/plugins/auto-tags";
+import { bearerAuth } from "../../src/plugins/bearer-auth";
 import { errorResponses } from "../../src/plugins/error-responses";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
 
@@ -81,8 +81,12 @@ describe("full pipeline", () => {
 
 		// Same structure
 		expect(Object.keys(fnDoc.paths)).toEqual(Object.keys(classDoc.paths));
-		expect(fnDoc.paths["/tasks"]?.get?.operationId).toBe(classDoc.paths["/tasks"]?.get?.operationId);
-		expect(fnDoc.paths["/tasks"]?.post?.operationId).toBe(classDoc.paths["/tasks"]?.post?.operationId);
+		expect(fnDoc.paths["/tasks"]?.get?.operationId).toBe(
+			classDoc.paths["/tasks"]?.get?.operationId,
+		);
+		expect(fnDoc.paths["/tasks"]?.post?.operationId).toBe(
+			classDoc.paths["/tasks"]?.post?.operationId,
+		);
 	});
 
 	it("merge combines two independently built documents", () => {

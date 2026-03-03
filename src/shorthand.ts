@@ -70,8 +70,7 @@ export function expandRoute(
 	if (definition.deprecated) operation.deprecated = definition.deprecated;
 	if (definition.security) operation.security = definition.security;
 
-	operation.operationId =
-		definition.operationId ?? generateOperationId(parsed.method, parsed.path);
+	operation.operationId = definition.operationId ?? generateOperationId(parsed.method, parsed.path);
 
 	return operation;
 }
@@ -234,7 +233,6 @@ function expandResponses(
 					"application/json": { schema },
 				},
 			};
-			continue;
 		}
 	}
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { OpenAPI } from "../../src/openapi-class";
 import { openapi } from "../../src/openapi-fn";
-import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
 import type { ToOpenapiPlugin } from "../../src/types";
+import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
 
 describe("OpenAPI class", () => {
 	it("produces a minimal valid document", () => {
@@ -67,8 +67,8 @@ describe("OpenAPI class", () => {
 		const doc = api.document();
 		const params = doc.paths["/tasks/{id}"]?.get?.parameters;
 		expect(params).toHaveLength(1);
-		expect(params![0]!.name).toBe("id");
-		expect(params![0]!.in).toBe("path");
+		expect(params?.[0]?.name).toBe("id");
+		expect(params?.[0]?.in).toBe("path");
 	});
 
 	it("respects openapi version option", () => {
@@ -118,13 +118,16 @@ describe("OpenAPI class", () => {
 
 		const params = doc.paths["/v1/tasks/{id}"]?.get?.parameters;
 		expect(params).toHaveLength(1);
-		expect(params![0]!.name).toBe("id");
-		expect(params![0]!.in).toBe("path");
+		expect(params?.[0]?.name).toBe("id");
+		expect(params?.[0]?.in).toBe("path");
 	});
 
 	describe("equivalence with openapi()", () => {
 		it("produces equivalent output for same input", () => {
-			const taskSchema = createMockSchema({ type: "object", properties: { id: { type: "string" } } });
+			const taskSchema = createMockSchema({
+				type: "object",
+				properties: { id: { type: "string" } },
+			});
 			const querySchema = createMockObjectSchema({ page: { type: "integer" } });
 
 			const fnDoc = openapi({

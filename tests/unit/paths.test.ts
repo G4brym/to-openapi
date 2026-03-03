@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseRouteKey } from "../../src/paths";
 import { ToOpenapiError } from "../../src/errors";
+import { parseRouteKey } from "../../src/paths";
 
 describe("parseRouteKey", () => {
 	it("parses simple GET route", () => {

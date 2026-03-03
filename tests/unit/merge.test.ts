@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { merge } from "../../src/merge";
 import { ToOpenapiError } from "../../src/errors";
+import { merge } from "../../src/merge";
 import type { OpenAPIDocument } from "../../src/types";
 
 function makeDoc(overrides: Partial<OpenAPIDocument> = {}): OpenAPIDocument {
@@ -79,7 +79,7 @@ describe("merge", () => {
 
 		const result = merge(base, source);
 		expect(result.tags).toHaveLength(2);
-		const names = result.tags!.map((t) => t.name);
+		const names = result.tags?.map((t) => t.name);
 		expect(names).toContain("tasks");
 		expect(names).toContain("users");
 	});

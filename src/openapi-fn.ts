@@ -72,10 +72,7 @@ export function openapi(definition: ToOpenapiDefinition): OpenAPIDocument {
 	return deepFreeze(doc) as OpenAPIDocument;
 }
 
-function runTransformRoute(
-	plugins: ToOpenapiPlugin[],
-	route: RouteDefinition,
-): RouteDefinition {
+function runTransformRoute(plugins: ToOpenapiPlugin[], route: RouteDefinition): RouteDefinition {
 	let result = route;
 	for (const plugin of plugins) {
 		if (plugin.transformRoute) {
@@ -85,10 +82,7 @@ function runTransformRoute(
 	return result;
 }
 
-function runTransformDocument(
-	plugins: ToOpenapiPlugin[],
-	doc: OpenAPIDocument,
-): OpenAPIDocument {
+function runTransformDocument(plugins: ToOpenapiPlugin[], doc: OpenAPIDocument): OpenAPIDocument {
 	let result = doc;
 	for (const plugin of plugins) {
 		if (plugin.transformDocument) {

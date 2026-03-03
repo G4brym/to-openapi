@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { expandRoute } from "../../src/shorthand";
 import { SchemaResolver } from "../../src/resolver";
+import { expandRoute } from "../../src/shorthand";
+import type {
+	ParsedRoute,
+	RequestBodyObject,
+	ResponseObject,
+	RouteShorthand,
+} from "../../src/types";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
-import type { ParsedRoute, RequestBodyObject, ResponseObject, RouteShorthand } from "../../src/types";
 
 function makeResolver(version: "3.0.3" | "3.1.0" = "3.1.0") {
 	return new SchemaResolver({ openapiVersion: version });
@@ -28,13 +33,13 @@ describe("expandRoute", () => {
 			const op = expandRoute(makeParsed(), { query }, resolver);
 
 			expect(op.parameters).toHaveLength(2);
-			expect(op.parameters![0]).toEqual({
+			expect(op.parameters?.[0]).toEqual({
 				name: "page",
 				in: "query",
 				schema: { type: "integer" },
 				required: true,
 			});
-			expect(op.parameters![1]).toEqual({
+			expect(op.parameters?.[1]).toEqual({
 				name: "limit",
 				in: "query",
 				schema: { type: "integer" },
@@ -46,7 +51,7 @@ describe("expandRoute", () => {
 			const query = createMockObjectSchema({ q: { type: "string" } });
 			const op = expandRoute(makeParsed(), { query }, resolver);
 
-			expect(op.parameters![0]!.required).toBeUndefined();
+			expect(op.parameters?.[0]?.required).toBeUndefined();
 		});
 	});
 
@@ -58,7 +63,7 @@ describe("expandRoute", () => {
 			const op = expandRoute(parsed, { params }, resolver);
 
 			expect(op.parameters).toHaveLength(1);
-			expect(op.parameters![0]).toEqual({
+			expect(op.parameters?.[0]).toEqual({
 				name: "id",
 				in: "path",
 				required: true,
@@ -72,7 +77,7 @@ describe("expandRoute", () => {
 			const op = expandRoute(parsed, {}, resolver);
 
 			expect(op.parameters).toHaveLength(1);
-			expect(op.parameters![0]).toEqual({
+			expect(op.parameters?.[0]).toEqual({
 				name: "id",
 				in: "path",
 				required: true,
@@ -90,24 +95,21 @@ describe("expandRoute", () => {
 			const op = expandRoute(parsed, { params }, resolver);
 
 			expect(op.parameters).toHaveLength(2);
-			const userParam = op.parameters!.find((p) => p.name === "userId");
-			const postParam = op.parameters!.find((p) => p.name === "postId");
-			expect(userParam!.schema).toEqual({ type: "integer" });
-			expect(postParam!.schema).toEqual({ type: "string" });
+			const userParam = op.parameters?.find((p) => p.name === "userId");
+			const postParam = op.parameters?.find((p) => p.name === "postId");
+			expect(userParam?.schema).toEqual({ type: "integer" });
+			expect(postParam?.schema).toEqual({ type: "string" });
 		});
 	});
 
 	describe("header parameters", () => {
 		it("expands headers schema into header parameters", () => {
 			const resolver = makeResolver();
-			const headers = createMockObjectSchema(
-				{ "x-api-key": { type: "string" } },
-				["x-api-key"],
-			);
+			const headers = createMockObjectSchema({ "x-api-key": { type: "string" } }, ["x-api-key"]);
 			const op = expandRoute(makeParsed(), { headers }, resolver);
 
 			expect(op.parameters).toHaveLength(1);
-			expect(op.parameters![0]).toEqual({
+			expect(op.parameters?.[0]).toEqual({
 				name: "x-api-key",
 				in: "header",
 				schema: { type: "string" },
@@ -152,7 +154,7 @@ describe("expandRoute", () => {
 			const definition: RouteShorthand = { 204: null };
 			const op = expandRoute(makeParsed(), definition, resolver);
 
-			expect(op.responses!["204"]).toEqual({ description: "No content" });
+			expect(op.responses?.["204"]).toEqual({ description: "No content" });
 		});
 
 		it("expands schema to json response", () => {
@@ -161,7 +163,7 @@ describe("expandRoute", () => {
 			const definition: RouteShorthand = { 200: schema };
 			const op = expandRoute(makeParsed(), definition, resolver);
 
-			expect(op.responses!["200"]).toEqual({
+			expect(op.responses?.["200"]).toEqual({
 				description: "Successful response",
 				content: {
 					"application/json": {
@@ -179,7 +181,7 @@ describe("expandRoute", () => {
 			const definition: RouteShorthand = { 200: "Task" as any };
 			const op = expandRoute(makeParsed(), definition, resolver);
 
-			expect(op.responses!["200"]).toEqual({
+			expect(op.responses?.["200"]).toEqual({
 				description: "Successful response",
 				content: {
 					"application/json": {
@@ -198,7 +200,7 @@ describe("expandRoute", () => {
 			const definition: RouteShorthand = { 200: response as any };
 			const op = expandRoute(makeParsed(), definition, resolver);
 
-			expect(op.responses!["200"]).toEqual(response);
+			expect(op.responses?.["200"]).toEqual(response);
 		});
 
 		it("uses STATUS_DESCRIPTIONS for known codes", () => {
@@ -211,9 +213,9 @@ describe("expandRoute", () => {
 			};
 			const op = expandRoute(makeParsed(), definition, resolver);
 
-			expect(op.responses!["400"]!.description).toBe("Bad request");
-			expect(op.responses!["404"]!.description).toBe("Not found");
-			expect(op.responses!["500"]!.description).toBe("Internal server error");
+			expect(op.responses?.["400"]?.description).toBe("Bad request");
+			expect(op.responses?.["404"]?.description).toBe("Not found");
+			expect(op.responses?.["500"]?.description).toBe("Internal server error");
 		});
 
 		it("uses fallback description for unknown status codes", () => {
@@ -221,7 +223,7 @@ describe("expandRoute", () => {
 			const definition: RouteShorthand = { 418: null };
 			const op = expandRoute(makeParsed(), definition, resolver);
 
-			expect(op.responses!["418"]!.description).toBe("Response 418");
+			expect(op.responses?.["418"]?.description).toBe("Response 418");
 		});
 	});
 
@@ -264,11 +266,7 @@ describe("expandRoute", () => {
 
 		it("auto-generates operationId when not provided", () => {
 			const resolver = makeResolver();
-			const op = expandRoute(
-				makeParsed({ method: "get", path: "/tasks/{id}" }),
-				{},
-				resolver,
-			);
+			const op = expandRoute(makeParsed({ method: "get", path: "/tasks/{id}" }), {}, resolver);
 			expect(op.operationId).toBe("get_tasks_id");
 		});
 	});
@@ -288,9 +286,9 @@ describe("expandRoute", () => {
 			// Second use: would be promoted to $ref internally, but params should still expand
 			const op2 = expandRoute(makeParsed({ method: "get", path: "/users" }), { query }, resolver);
 			expect(op2.parameters).toHaveLength(2);
-			expect(op2.parameters![0]!.name).toBe("page");
-			expect(op2.parameters![0]!.required).toBe(true);
-			expect(op2.parameters![1]!.name).toBe("limit");
+			expect(op2.parameters?.[0]?.name).toBe("page");
+			expect(op2.parameters?.[0]?.required).toBe(true);
+			expect(op2.parameters?.[1]?.name).toBe("limit");
 		});
 	});
 
@@ -304,7 +302,7 @@ describe("expandRoute", () => {
 			const op = expandRoute(parsed, { query, headers }, resolver);
 
 			expect(op.parameters).toHaveLength(3);
-			const types = op.parameters!.map((p) => p.in);
+			const types = op.parameters?.map((p) => p.in);
 			expect(types).toContain("query");
 			expect(types).toContain("path");
 			expect(types).toContain("header");

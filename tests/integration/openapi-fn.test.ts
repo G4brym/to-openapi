@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { openapi } from "../../src/openapi-fn";
-import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
 import type { ToOpenapiDefinition, ToOpenapiPlugin } from "../../src/types";
+import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
 
 const baseDefinition: ToOpenapiDefinition = {
 	info: { title: "Test API", version: "1.0.0" },
@@ -45,9 +45,9 @@ describe("openapi()", () => {
 
 		const getOp = doc.paths["/tasks"]?.get;
 		expect(getOp).toBeDefined();
-		expect(getOp!.parameters).toHaveLength(1);
-		expect(getOp!.parameters![0]!.name).toBe("page");
-		expect(getOp!.responses?.["200"]).toBeDefined();
+		expect(getOp?.parameters).toHaveLength(1);
+		expect(getOp?.parameters?.[0]?.name).toBe("page");
+		expect(getOp?.responses?.["200"]).toBeDefined();
 	});
 
 	it("registers named schemas and creates refs", () => {
@@ -145,8 +145,8 @@ describe("openapi()", () => {
 		// Path params should still be detected correctly
 		const params = doc.paths["/v1/tasks/{id}"]?.get?.parameters;
 		expect(params).toHaveLength(1);
-		expect(params![0]!.name).toBe("id");
-		expect(params![0]!.in).toBe("path");
+		expect(params?.[0]?.name).toBe("id");
+		expect(params?.[0]?.in).toBe("path");
 	});
 
 	it("handles multiple routes", () => {
@@ -198,13 +198,15 @@ describe("openapi()", () => {
 			},
 		});
 
-		const bodySchema = (doc.paths["/tasks"]?.post?.requestBody as any)
-			?.content?.["application/json"]?.schema;
+		const bodySchema = (doc.paths["/tasks"]?.post?.requestBody as any)?.content?.[
+			"application/json"
+		]?.schema;
 		expect(bodySchema["x-internal"]).toBeUndefined();
 		expect(bodySchema.type).toBe("object");
 
-		const responseSchema = (doc.paths["/tasks"]?.post?.responses?.["200"] as any)
-			?.content?.["application/json"]?.schema;
+		const responseSchema = (doc.paths["/tasks"]?.post?.responses?.["200"] as any)?.content?.[
+			"application/json"
+		]?.schema;
 		expect(responseSchema["x-internal"]).toBeUndefined();
 		expect(responseSchema.type).toBe("object");
 	});

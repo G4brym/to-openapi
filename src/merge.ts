@@ -1,10 +1,5 @@
 import { ToOpenapiError } from "./errors.js";
-import type {
-	ComponentsObject,
-	OpenAPIDocument,
-	PathItemObject,
-	TagObject,
-} from "./types.js";
+import type { ComponentsObject, OpenAPIDocument, PathItemObject, TagObject } from "./types.js";
 
 export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): OpenAPIDocument {
 	const paths: Record<string, PathItemObject> = { ...base.paths };
@@ -29,8 +24,18 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 				continue;
 			}
 
+			// biome-ignore lint/style/noNonNullAssertion: pathKey is guaranteed to exist from the check above
 			const existing = paths[pathKey]!;
-			const methods = ["get", "post", "put", "patch", "delete", "head", "options", "trace"] as const;
+			const methods = [
+				"get",
+				"post",
+				"put",
+				"patch",
+				"delete",
+				"head",
+				"options",
+				"trace",
+			] as const;
 			for (const method of methods) {
 				if (pathItem[method]) {
 					if (existing[method]) {
@@ -47,10 +52,7 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 		if (source.components?.schemas) {
 			for (const [name, schema] of Object.entries(source.components.schemas)) {
 				if (componentSchemas[name]) {
-					throw new ToOpenapiError(
-						"DUPLICATE_SCHEMA",
-						`Duplicate component schema: "${name}"`,
-					);
+					throw new ToOpenapiError("DUPLICATE_SCHEMA", `Duplicate component schema: "${name}"`);
 				}
 				componentSchemas[name] = schema;
 			}

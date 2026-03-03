@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { deepFreeze, deepMerge, isFullRequestBodyObject, isFullResponseObject, isStandardJSONSchema } from "../../src/utils";
+import {
+	deepFreeze,
+	deepMerge,
+	isFullRequestBodyObject,
+	isFullResponseObject,
+	isStandardJSONSchema,
+} from "../../src/utils";
 import { createMockSchema } from "../helpers/mock-schemas";
 
 describe("deepMerge", () => {

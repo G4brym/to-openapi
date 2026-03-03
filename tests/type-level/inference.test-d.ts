@@ -1,15 +1,15 @@
-import { describe, expectTypeOf, it } from "vitest";
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
-import { openapi } from "../../src/openapi-fn";
-import { OpenAPI } from "../../src/openapi-class";
-import { merge } from "../../src/merge";
+import { describe, expectTypeOf, it } from "vitest";
 import { extend } from "../../src/extend";
+import { merge } from "../../src/merge";
+import { OpenAPI } from "../../src/openapi-class";
+import { openapi } from "../../src/openapi-fn";
 import type {
+	HttpMethod,
 	OpenAPIDocument,
+	RouteShorthand,
 	ToOpenapiDefinition,
 	ToOpenapiPlugin,
-	RouteShorthand,
-	HttpMethod,
 } from "../../src/types";
 
 describe("type-level inference", () => {

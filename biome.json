@@ -1,5 +1,8 @@
 {
 	"$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
+	"files": {
+		"ignore": ["dist/**", ".changeset/**"]
+	},
 	"formatter": {
 		"indentStyle": "tab",
 		"lineWidth": 100
@@ -15,6 +18,21 @@
 			"recommended": true
 		}
 	},
+	"overrides": [
+		{
+			"include": ["tests/**"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noExplicitAny": "off"
+					},
+					"style": {
+						"noNonNullAssertion": "off"
+					}
+				}
+			}
+		}
+	],
 	"organizeImports": {
 		"enabled": true
 	}

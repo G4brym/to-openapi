@@ -50,7 +50,9 @@ export function parseRouteKey(key: string): ParsedRoute {
 
 	const braceParamRegex = /\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g;
 	let match: RegExpExecArray | null;
+	// biome-ignore lint/suspicious/noAssignInExpressions: standard regex exec loop pattern
 	while ((match = braceParamRegex.exec(path)) !== null) {
+		// biome-ignore lint/style/noNonNullAssertion: capture group 1 is guaranteed by the regex
 		const param = match[1]!;
 		if (!pathParams.includes(param)) {
 			pathParams.push(param);
@@ -68,7 +70,9 @@ export function extractPathParams(path: string): string[] {
 	const params: string[] = [];
 	const regex = /\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g;
 	let match: RegExpExecArray | null;
+	// biome-ignore lint/suspicious/noAssignInExpressions: standard regex exec loop pattern
 	while ((match = regex.exec(path)) !== null) {
+		// biome-ignore lint/style/noNonNullAssertion: capture group 1 is guaranteed by the regex
 		params.push(match[1]!);
 	}
 	return params;

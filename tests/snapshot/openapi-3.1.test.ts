@@ -50,12 +50,10 @@ describe("OpenAPI 3.1.0 snapshot", () => {
 				"GET /tasks": {
 					summary: "List all tasks",
 					tags: ["tasks"],
-					query: createMockObjectSchema(
-						{
-							page: { type: "integer", minimum: 1 },
-							limit: { type: "integer", minimum: 1, maximum: 100 },
-						},
-					),
+					query: createMockObjectSchema({
+						page: { type: "integer", minimum: 1 },
+						limit: { type: "integer", minimum: 1, maximum: 100 },
+					}),
 					200: createMockSchema({
 						type: "array",
 						items: { $ref: "#/components/schemas/Task" },

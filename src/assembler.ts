@@ -4,11 +4,11 @@ import type {
 	ComponentsObject,
 	HttpMethod,
 	OpenAPIDocument,
+	OpenAPIOptions,
 	OperationObject,
 	PathItemObject,
 	SecuritySchemeObject,
 	ToOpenapiDefinition,
-	OpenAPIOptions,
 } from "./types.js";
 
 export interface AssembleInput {
@@ -33,6 +33,7 @@ export function assembleDocument(
 			paths[route.path] = {};
 		}
 
+		// biome-ignore lint/style/noNonNullAssertion: path is guaranteed to exist from the check above
 		const pathItem = paths[route.path]!;
 		if (pathItem[route.method]) {
 			throw new ToOpenapiError(

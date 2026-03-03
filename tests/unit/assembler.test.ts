@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { assembleDocument } from "../../src/assembler";
 import { ToOpenapiError } from "../../src/errors";
 import { SchemaResolver } from "../../src/resolver";
-import { createMockSchema } from "../helpers/mock-schemas";
 import type { OperationObject } from "../../src/types";
+import { createMockSchema } from "../helpers/mock-schemas";
 
 function makeResolver(version: "3.0.3" | "3.1.0" = "3.1.0") {
 	return new SchemaResolver({ openapiVersion: version });
@@ -14,11 +14,7 @@ const baseInfo = { title: "Test API", version: "1.0.0" };
 describe("assembleDocument", () => {
 	it("creates a minimal document", () => {
 		const resolver = makeResolver();
-		const doc = assembleDocument(
-			{ info: baseInfo, openapiVersion: "3.1.0" },
-			[],
-			resolver,
-		);
+		const doc = assembleDocument({ info: baseInfo, openapiVersion: "3.1.0" }, [], resolver);
 
 		expect(doc.openapi).toBe("3.1.0");
 		expect(doc.info).toEqual(baseInfo);
@@ -88,11 +84,7 @@ describe("assembleDocument", () => {
 		resolver.registerNamed("Task", schema);
 		resolver.resolve("Task");
 
-		const doc = assembleDocument(
-			{ info: baseInfo, openapiVersion: "3.1.0" },
-			[],
-			resolver,
-		);
+		const doc = assembleDocument({ info: baseInfo, openapiVersion: "3.1.0" }, [], resolver);
 
 		expect(doc.components?.schemas?.Task).toEqual({ type: "object" });
 	});
@@ -179,22 +171,14 @@ describe("assembleDocument", () => {
 
 	it("omits components when empty", () => {
 		const resolver = makeResolver();
-		const doc = assembleDocument(
-			{ info: baseInfo, openapiVersion: "3.1.0" },
-			[],
-			resolver,
-		);
+		const doc = assembleDocument({ info: baseInfo, openapiVersion: "3.1.0" }, [], resolver);
 
 		expect(doc.components).toBeUndefined();
 	});
 
 	it("sets correct openapi version for 3.0.3", () => {
 		const resolver = makeResolver("3.0.3");
-		const doc = assembleDocument(
-			{ info: baseInfo, openapiVersion: "3.0.3" },
-			[],
-			resolver,
-		);
+		const doc = assembleDocument({ info: baseInfo, openapiVersion: "3.0.3" }, [], resolver);
 
 		expect(doc.openapi).toBe("3.0.3");
 	});

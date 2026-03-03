@@ -1,7 +1,7 @@
+import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { describe, expect, it } from "vitest";
 import { extend } from "../../src/extend";
 import { createMockSchema } from "../helpers/mock-schemas";
-import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 
 describe("extend", () => {
 	it("overlays properties onto schema output", () => {
