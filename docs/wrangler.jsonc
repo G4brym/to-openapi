@@ -1,0 +1,14 @@
+{
+	"name": "to-openapi-docs",
+	"account_id": "0983f9c21d0167d8d677be145016932e",
+	"compatibility_date": "2024-09-23",
+	"build": {
+		"command": "vitepress build"
+	},
+	"routes": [
+		{ "pattern": "to-openapi.massadas.com", "custom_domain": true }
+	],
+	"assets": {
+		"directory": "./.vitepress/dist"
+	}
+}
