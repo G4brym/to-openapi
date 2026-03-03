@@ -1,0 +1,178 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`OpenAPI 3.0.3 snapshot > generates a complete API document with 3.0.3 version 1`] = `
+{
+  "components": {
+    "schemas": {
+      "User": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string",
+          },
+          "id": {
+            "type": "integer",
+          },
+          "name": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+        ],
+        "type": "object",
+      },
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http",
+      },
+    },
+  },
+  "info": {
+    "title": "User API",
+    "version": "2.0.0",
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/users": {
+      "get": {
+        "operationId": "get_users",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string",
+            },
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "enum": [
+                "admin",
+                "user",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/User",
+                  },
+                  "type": "array",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+          "401": {
+            "description": "Unauthorized",
+          },
+        },
+        "summary": "List users",
+      },
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "get_users_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+            },
+          },
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+          "404": {
+            "description": "Not found",
+          },
+        },
+        "summary": "Get user by ID",
+      },
+      "put": {
+        "operationId": "put_users_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
+                    "type": "string",
+                  },
+                  "name": {
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+          "400": {
+            "description": "Bad request",
+          },
+          "404": {
+            "description": "Not found",
+          },
+        },
+        "summary": "Update user",
+      },
+    },
+  },
+  "security": [
+    {
+      "bearerAuth": [],
+    },
+  ],
+  "servers": [
+    {
+      "url": "https://api.users.example.com",
+    },
+  ],
+}
+`;

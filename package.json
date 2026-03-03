@@ -1,0 +1,50 @@
+{
+	"name": "stdspec",
+	"version": "0.1.0",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.cjs"
+		},
+		"./plugins/bearer-auth": {
+			"types": "./dist/plugins/bearer-auth.d.ts",
+			"import": "./dist/plugins/bearer-auth.mjs",
+			"require": "./dist/plugins/bearer-auth.cjs"
+		},
+		"./plugins/auto-tags": {
+			"types": "./dist/plugins/auto-tags.d.ts",
+			"import": "./dist/plugins/auto-tags.mjs",
+			"require": "./dist/plugins/auto-tags.cjs"
+		},
+		"./plugins/error-responses": {
+			"types": "./dist/plugins/error-responses.d.ts",
+			"import": "./dist/plugins/error-responses.mjs",
+			"require": "./dist/plugins/error-responses.cjs"
+		}
+	},
+	"files": ["dist"],
+	"scripts": {
+		"build": "tsup",
+		"check": "biome check .",
+		"format": "biome check --write .",
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"@standard-schema/spec": ">=1.1.0"
+	},
+	"peerDependenciesMeta": {
+		"@standard-schema/spec": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.0",
+		"@standard-schema/spec": "^1.1.0",
+		"tsup": "^8.0.0",
+		"typescript": "^5.7.0",
+		"vitest": "^3.0.0"
+	}
+}
