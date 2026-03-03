@@ -118,6 +118,61 @@ describe("expandRoute", () => {
 		});
 	});
 
+	describe("deprecated parameters", () => {
+		it("propagates deprecated from query property schema", () => {
+			const resolver = makeResolver();
+			const query = createMockObjectSchema({
+				oldParam: { type: "string", deprecated: true },
+				newParam: { type: "string" },
+			});
+			const op = expandRoute(makeParsed(), { query }, resolver);
+
+			const oldParam = op.parameters?.find((p) => p.name === "oldParam");
+			const newParam = op.parameters?.find((p) => p.name === "newParam");
+			expect(oldParam?.deprecated).toBe(true);
+			expect(newParam?.deprecated).toBeUndefined();
+		});
+
+		it("propagates deprecated from path property schema", () => {
+			const resolver = makeResolver();
+			const params = createMockObjectSchema({
+				id: { type: "string", deprecated: true },
+			});
+			const parsed = makeParsed({ path: "/items/{id}", pathParams: ["id"] });
+			const op = expandRoute(parsed, { params }, resolver);
+
+			expect(op.parameters?.[0]?.deprecated).toBe(true);
+		});
+
+		it("propagates deprecated from header property schema", () => {
+			const resolver = makeResolver();
+			const headers = createMockObjectSchema({
+				"x-old-header": { type: "string", deprecated: true },
+			});
+			const op = expandRoute(makeParsed(), { headers }, resolver);
+
+			expect(op.parameters?.[0]?.deprecated).toBe(true);
+		});
+
+		it("propagates deprecated from cookie property schema", () => {
+			const resolver = makeResolver();
+			const cookies = createMockObjectSchema({
+				oldCookie: { type: "string", deprecated: true },
+			});
+			const op = expandRoute(makeParsed(), { cookies }, resolver);
+
+			expect(op.parameters?.[0]?.deprecated).toBe(true);
+		});
+
+		it("does not set deprecated when not present in schema", () => {
+			const resolver = makeResolver();
+			const query = createMockObjectSchema({ active: { type: "string" } });
+			const op = expandRoute(makeParsed(), { query }, resolver);
+
+			expect(op.parameters?.[0]?.deprecated).toBeUndefined();
+		});
+	});
+
 	describe("request body", () => {
 		it("wraps schema in application/json content", () => {
 			const resolver = makeResolver();

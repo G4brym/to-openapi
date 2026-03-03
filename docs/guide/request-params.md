@@ -101,6 +101,22 @@ Provide an object schema to `cookies`. Each property becomes a cookie parameter.
 
 This produces two cookie parameters: `session_id` (required) and `theme` (optional).
 
+## Deprecated Parameters
+
+If a property in your parameter schema includes `deprecated: true`, it propagates to the generated OpenAPI parameter. This works for query, path, header, and cookie parameters.
+
+```ts
+'GET /users': {
+  query: z.object({
+    oldFilter: z.string().openapi({ deprecated: true }),
+    filter: z.string(),
+  }),
+  200: UserListSchema,
+}
+```
+
+The `oldFilter` parameter will have `deprecated: true` in the OpenAPI output. The mechanism depends on your schema library — the property must resolve to a JSON Schema with `deprecated: true`.
+
 ## Required Fields
 
 Whether a parameter is required depends on its presence in the JSON Schema `required` array:

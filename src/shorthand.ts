@@ -99,6 +99,9 @@ function expandQueryParams(
 		if (required.has(name)) {
 			param.required = true;
 		}
+		if ((propSchema as Record<string, unknown>).deprecated === true) {
+			param.deprecated = true;
+		}
 		parameters.push(param);
 	}
 }
@@ -115,12 +118,16 @@ function expandPathParams(
 
 	if (properties) {
 		for (const [name, propSchema] of Object.entries(properties)) {
-			parameters.push({
+			const param: ParameterObject = {
 				name,
 				in: "path",
 				required: true,
 				schema: propSchema as SchemaOrRef,
-			});
+			};
+			if ((propSchema as Record<string, unknown>).deprecated === true) {
+				param.deprecated = true;
+			}
+			parameters.push(param);
 			definedParams.add(name);
 		}
 	}
@@ -168,6 +175,9 @@ function expandHeaderParams(
 		if (required.has(name)) {
 			param.required = true;
 		}
+		if ((propSchema as Record<string, unknown>).deprecated === true) {
+			param.deprecated = true;
+		}
 		parameters.push(param);
 	}
 }
@@ -191,6 +201,9 @@ function expandCookieParams(
 		};
 		if (required.has(name)) {
 			param.required = true;
+		}
+		if ((propSchema as Record<string, unknown>).deprecated === true) {
+			param.deprecated = true;
 		}
 		parameters.push(param);
 	}
