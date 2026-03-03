@@ -46,10 +46,10 @@ export default defineConfig({
 					text: "Frameworks",
 					items: [
 						{ text: "Standalone", link: "/frameworks/standalone" },
-						{ text: "Chanfana", link: "/frameworks/chanfana" },
 						{ text: "Hono", link: "/frameworks/hono" },
 						{ text: "Express", link: "/frameworks/express" },
 						{ text: "Fastify", link: "/frameworks/fastify" },
+						{ text: "Chanfana", link: "/frameworks/chanfana" },
 					],
 				},
 			],
