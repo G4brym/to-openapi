@@ -7,9 +7,10 @@ import { autoTags } from "../../src/plugins/auto-tags";
 import { bearerAuth } from "../../src/plugins/bearer-auth";
 import { errorResponses } from "../../src/plugins/error-responses";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
+import { assertValidOpenAPI } from "../helpers/validate";
 
 describe("full pipeline", () => {
-	it("declarative API with plugins produces valid document", () => {
+	it("declarative API with plugins produces valid document", async () => {
 		const errorSchema = createMockSchema({
 			type: "object",
 			properties: { message: { type: "string" } },
@@ -59,9 +60,10 @@ describe("full pipeline", () => {
 
 		// Document is frozen
 		expect(Object.isFrozen(doc)).toBe(true);
+		await assertValidOpenAPI(doc);
 	});
 
-	it("imperative API produces same result as declarative for equivalent input", () => {
+	it("imperative API produces same result as declarative for equivalent input", async () => {
 		const taskSchema = createMockSchema({ type: "object" });
 
 		const fnDoc = openapi({
@@ -87,9 +89,11 @@ describe("full pipeline", () => {
 		expect(fnDoc.paths["/tasks"]?.post?.operationId).toBe(
 			classDoc.paths["/tasks"]?.post?.operationId,
 		);
+		await assertValidOpenAPI(fnDoc);
+		await assertValidOpenAPI(classDoc);
 	});
 
-	it("merge combines two independently built documents", () => {
+	it("merge combines two independently built documents", async () => {
 		const tasksDoc = openapi({
 			info: { title: "Tasks", version: "1.0.0" },
 			schemas: { Task: createMockSchema({ type: "object", title: "Task" }) },
@@ -117,9 +121,10 @@ describe("full pipeline", () => {
 		expect(merged.paths["/users"]).toBeDefined();
 		expect(merged.components?.schemas?.Task).toBeDefined();
 		expect(merged.components?.schemas?.User).toBeDefined();
+		await assertValidOpenAPI(merged);
 	});
 
-	it("extend modifies schema output in generated document", () => {
+	it("extend modifies schema output in generated document", async () => {
 		const baseSchema = createMockSchema({
 			type: "object",
 			properties: { name: { type: "string" } },
@@ -142,6 +147,7 @@ describe("full pipeline", () => {
 			"application/json"
 		]?.schema;
 		expect(bodySchema.properties.age).toEqual({ type: "number" });
+		await assertValidOpenAPI(doc);
 	});
 
 	it("plugin ordering is respected", () => {
@@ -176,7 +182,7 @@ describe("full pipeline", () => {
 		expect(doc.paths["/test"]?.get?.description).toBe("Tags: first");
 	});
 
-	it("bearerAuth exclude works in full pipeline", () => {
+	it("bearerAuth exclude works in full pipeline", async () => {
 		const doc = openapi({
 			info: { title: "Exclude Test", version: "1.0.0" },
 			plugins: [bearerAuth({ exclude: ["/health"] })],
@@ -188,5 +194,6 @@ describe("full pipeline", () => {
 
 		expect(doc.paths["/tasks"]?.get?.security).toEqual([{ bearerAuth: [] }]);
 		expect(doc.paths["/health"]?.get?.security).toBeUndefined();
+		await assertValidOpenAPI(doc);
 	});
 });

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { openapi } from "../../src/openapi-fn";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
+import { assertValidOpenAPI } from "../helpers/validate";
 
 describe("OpenAPI 3.1.0 snapshot", () => {
-	it("generates a complete API document", () => {
+	it("generates a complete API document", async () => {
 		const TaskSchema = createMockSchema({
 			type: "object",
 			properties: {
@@ -82,6 +83,7 @@ describe("OpenAPI 3.1.0 snapshot", () => {
 		});
 
 		expect(doc.openapi).toBe("3.1.0");
+		await assertValidOpenAPI(doc);
 		expect(doc).toMatchSnapshot();
 	});
 });

@@ -3,15 +3,17 @@ import { OpenAPI } from "../../src/openapi-class";
 import { openapi } from "../../src/openapi-fn";
 import type { ToOpenapiPlugin } from "../../src/types";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
+import { assertValidOpenAPI } from "../helpers/validate";
 
 describe("OpenAPI class", () => {
-	it("produces a minimal valid document", () => {
+	it("produces a minimal valid document", async () => {
 		const api = new OpenAPI({ info: { title: "Test API", version: "1.0.0" } });
 		const doc = api.document();
 
 		expect(doc.openapi).toBe("3.1.0");
 		expect(doc.info.title).toBe("Test API");
 		expect(doc.paths).toEqual({});
+		await assertValidOpenAPI(doc);
 	});
 
 	it("freezes the output document", () => {
@@ -20,7 +22,7 @@ describe("OpenAPI class", () => {
 		expect(Object.isFrozen(doc)).toBe(true);
 	});
 
-	it("adds routes via .route()", () => {
+	it("adds routes via .route()", async () => {
 		const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
 		api.route("get", "/tasks", { 200: null });
 
@@ -29,9 +31,10 @@ describe("OpenAPI class", () => {
 		expect(doc.paths["/tasks"]?.get?.responses?.["200"]).toEqual({
 			description: "Successful response",
 		});
+		await assertValidOpenAPI(doc);
 	});
 
-	it("registers named schemas via .schema()", () => {
+	it("registers named schemas via .schema()", async () => {
 		const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
 		const taskSchema = createMockSchema({ type: "object" });
 		api.schema("Task", taskSchema);
@@ -39,9 +42,10 @@ describe("OpenAPI class", () => {
 
 		const doc = api.document();
 		expect(doc.components?.schemas?.Task).toEqual({ type: "object" });
+		await assertValidOpenAPI(doc);
 	});
 
-	it("supports method chaining", () => {
+	it("supports method chaining", async () => {
 		const doc = new OpenAPI({ info: { title: "Test", version: "1.0.0" } })
 			.schema("Task", createMockSchema({ type: "object" }))
 			.route("get", "/tasks", { 200: null })
@@ -50,6 +54,7 @@ describe("OpenAPI class", () => {
 
 		expect(doc.paths["/tasks"]?.get).toBeDefined();
 		expect(doc.paths["/tasks"]?.post).toBeDefined();
+		await assertValidOpenAPI(doc);
 	});
 
 	it("normalizes :param to {param} in paths", () => {
@@ -80,7 +85,7 @@ describe("OpenAPI class", () => {
 		expect(doc.openapi).toBe("3.0.3");
 	});
 
-	it("runs plugins", () => {
+	it("runs plugins", async () => {
 		const plugin: ToOpenapiPlugin = {
 			name: "test-plugin",
 			transformRoute: (route) => ({ ...route, tags: ["auto"] }),
@@ -94,6 +99,7 @@ describe("OpenAPI class", () => {
 
 		const doc = api.document();
 		expect(doc.paths["/tasks"]?.get?.tags).toEqual(["auto"]);
+		await assertValidOpenAPI(doc);
 	});
 
 	it("uses plugin-modified path for output and path params", () => {
@@ -123,7 +129,7 @@ describe("OpenAPI class", () => {
 	});
 
 	describe("equivalence with openapi()", () => {
-		it("produces equivalent output for same input", () => {
+		it("produces equivalent output for same input", async () => {
 			const taskSchema = createMockSchema({
 				type: "object",
 				properties: { id: { type: "string" } },
@@ -157,6 +163,8 @@ describe("OpenAPI class", () => {
 			const classOp = classDoc.paths["/tasks"]?.get;
 			expect(fnOp?.parameters).toEqual(classOp?.parameters);
 			expect(fnOp?.operationId).toEqual(classOp?.operationId);
+			await assertValidOpenAPI(fnDoc);
+			await assertValidOpenAPI(classDoc);
 		});
 	});
 });

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { openapi } from "../../src/openapi-fn";
 import type { ToOpenapiDefinition, ToOpenapiPlugin } from "../../src/types";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
+import { assertValidOpenAPI } from "../helpers/validate";
 
 const baseDefinition: ToOpenapiDefinition = {
 	info: { title: "Test API", version: "1.0.0" },
@@ -9,11 +10,12 @@ const baseDefinition: ToOpenapiDefinition = {
 };
 
 describe("openapi()", () => {
-	it("produces a minimal valid document", () => {
+	it("produces a minimal valid document", async () => {
 		const doc = openapi(baseDefinition);
 		expect(doc.openapi).toBe("3.1.0");
 		expect(doc.info.title).toBe("Test API");
 		expect(doc.paths).toEqual({});
+		await assertValidOpenAPI(doc);
 	});
 
 	it("defaults to OpenAPI 3.1.0", () => {
@@ -32,7 +34,7 @@ describe("openapi()", () => {
 		expect(Object.isFrozen(doc.info)).toBe(true);
 	});
 
-	it("expands routes with schemas", () => {
+	it("expands routes with schemas", async () => {
 		const doc = openapi({
 			...baseDefinition,
 			paths: {
@@ -48,9 +50,10 @@ describe("openapi()", () => {
 		expect(getOp?.parameters).toHaveLength(1);
 		expect(getOp?.parameters?.[0]?.name).toBe("page");
 		expect(getOp?.responses?.["200"]).toBeDefined();
+		await assertValidOpenAPI(doc);
 	});
 
-	it("registers named schemas and creates refs", () => {
+	it("registers named schemas and creates refs", async () => {
 		const taskSchema = createMockSchema({ type: "object", properties: { id: { type: "string" } } });
 
 		const doc = openapi({
@@ -66,9 +69,10 @@ describe("openapi()", () => {
 		expect(doc.components?.schemas?.Task).toBeDefined();
 		const response = doc.paths["/tasks/{id}"]?.get?.responses?.["200"];
 		expect(response).toBeDefined();
+		await assertValidOpenAPI(doc);
 	});
 
-	it("includes servers, tags, and security", () => {
+	it("includes servers, tags, and security", async () => {
 		const doc = openapi({
 			...baseDefinition,
 			servers: [{ url: "https://api.example.com" }],
@@ -81,6 +85,7 @@ describe("openapi()", () => {
 		expect(doc.tags).toHaveLength(1);
 		expect(doc.security).toHaveLength(1);
 		expect(doc.components?.securitySchemes?.bearerAuth).toBeDefined();
+		await assertValidOpenAPI(doc);
 	});
 
 	it("runs transformRoute plugins", () => {
@@ -149,7 +154,7 @@ describe("openapi()", () => {
 		expect(params?.[0]?.in).toBe("path");
 	});
 
-	it("handles multiple routes", () => {
+	it("handles multiple routes", async () => {
 		const doc = openapi({
 			...baseDefinition,
 			paths: {
@@ -167,6 +172,7 @@ describe("openapi()", () => {
 		expect(doc.paths["/tasks/{id}"]?.get).toBeDefined();
 		expect(doc.paths["/tasks/{id}"]?.put).toBeDefined();
 		expect(doc.paths["/tasks/{id}"]?.delete).toBeDefined();
+		await assertValidOpenAPI(doc);
 	});
 
 	it("runs transformSchema on body and response schemas", () => {
