@@ -99,6 +99,7 @@ const doc = api.document();
 
 | Plugin | Import | Description |
 | ------ | ------ | ----------- |
+| [API Key Auth](./api-key-auth.md) | `to-openapi/plugins/api-key-auth` | Adds API key authentication (header, query, or cookie) to all routes with optional path exclusions. |
 | [Bearer Auth](./bearer-auth.md) | `to-openapi/plugins/bearer-auth` | Adds bearer token security to all routes with optional path exclusions. |
 | [Auto Tags](./auto-tags.md) | `to-openapi/plugins/auto-tags` | Automatically tags operations based on the first URL path segment. |
 | [Error Responses](./error-responses.md) | `to-openapi/plugins/error-responses` | Adds common error responses (400, 401, 500, etc.) to routes that don't already define them. |

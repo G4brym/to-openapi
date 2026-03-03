@@ -64,7 +64,8 @@ export default defineConfig({
 				{
 					text: "Built-in Plugins",
 					items: [
-						{ text: "Bearer Auth", link: "/plugins/bearer-auth" },
+						{ text: "API Key Auth", link: "/plugins/api-key-auth" },
+					{ text: "Bearer Auth", link: "/plugins/bearer-auth" },
 						{ text: "Auto Tags", link: "/plugins/auto-tags" },
 						{ text: "Error Responses", link: "/plugins/error-responses" },
 					],

@@ -4,6 +4,7 @@ import { merge } from "../../src/merge";
 import { OpenAPI } from "../../src/openapi-class";
 import { openapi } from "../../src/openapi-fn";
 import { autoTags } from "../../src/plugins/auto-tags";
+import { apiKeyAuth } from "../../src/plugins/api-key-auth";
 import { bearerAuth } from "../../src/plugins/bearer-auth";
 import { errorResponses } from "../../src/plugins/error-responses";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
@@ -180,6 +181,26 @@ describe("full pipeline", () => {
 		expect(order).toEqual(["first", "second"]);
 		expect(doc.paths["/test"]?.get?.tags).toEqual(["first"]);
 		expect(doc.paths["/test"]?.get?.description).toBe("Tags: first");
+	});
+
+	it("apiKeyAuth plugin works in full pipeline", async () => {
+		const doc = openapi({
+			info: { title: "API Key Test", version: "1.0.0" },
+			plugins: [apiKeyAuth({ name: "X-API-Key", in: "header", exclude: ["/health"] })],
+			paths: {
+				"GET /tasks": { 200: null },
+				"GET /health": { 200: null },
+			},
+		});
+
+		expect(doc.components?.securitySchemes?.apiKeyAuth).toEqual({
+			type: "apiKey",
+			name: "X-API-Key",
+			in: "header",
+		});
+		expect(doc.paths["/tasks"]?.get?.security).toEqual([{ apiKeyAuth: [] }]);
+		expect(doc.paths["/health"]?.get?.security).toBeUndefined();
+		await assertValidOpenAPI(doc);
 	});
 
 	it("bearerAuth exclude works in full pipeline", async () => {

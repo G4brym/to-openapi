@@ -22,6 +22,11 @@
 			"types": "./dist/plugins/error-responses.d.ts",
 			"import": "./dist/plugins/error-responses.mjs",
 			"require": "./dist/plugins/error-responses.cjs"
+		},
+		"./plugins/api-key-auth": {
+			"types": "./dist/plugins/api-key-auth.d.ts",
+			"import": "./dist/plugins/api-key-auth.mjs",
+			"require": "./dist/plugins/api-key-auth.cjs"
 		}
 	},
 	"files": [
