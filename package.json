@@ -24,7 +24,7 @@
 			"require": "./dist/plugins/error-responses.cjs"
 		}
 	},
-	"files": ["dist"],
+	"files": ["dist", "docs/**/*.md", "skills", "README.md", "LICENSE", "CHANGELOG.md"],
 	"scripts": {
 		"build": "tsup",
 		"check": "biome check .",
