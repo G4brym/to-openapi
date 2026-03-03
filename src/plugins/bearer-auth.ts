@@ -1,4 +1,4 @@
-import type { OpenAPIDocument, RouteDefinition, StdspecPlugin } from "../types.js";
+import type { OpenAPIDocument, RouteDefinition, ToOpenapiPlugin } from "../types.js";
 
 export interface BearerAuthOptions {
 	schemeName?: string;
@@ -7,7 +7,7 @@ export interface BearerAuthOptions {
 	exclude?: string[];
 }
 
-export function bearerAuth(options: BearerAuthOptions = {}): StdspecPlugin {
+export function bearerAuth(options: BearerAuthOptions = {}): ToOpenapiPlugin {
 	const schemeName = options.schemeName ?? "bearerAuth";
 	const excludeSet = new Set(options.exclude ?? []);
 

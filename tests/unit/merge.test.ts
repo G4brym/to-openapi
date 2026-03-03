@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { merge } from "../../src/merge";
-import { StdspecError } from "../../src/errors";
+import { ToOpenapiError } from "../../src/errors";
 import type { OpenAPIDocument } from "../../src/types";
 
 function makeDoc(overrides: Partial<OpenAPIDocument> = {}): OpenAPIDocument {
@@ -35,11 +35,11 @@ describe("merge", () => {
 		const base = makeDoc({ paths: { "/tasks": { get: { operationId: "a" } } } });
 		const source = makeDoc({ paths: { "/tasks": { get: { operationId: "b" } } } });
 
-		expect(() => merge(base, source)).toThrow(StdspecError);
+		expect(() => merge(base, source)).toThrow(ToOpenapiError);
 		try {
 			merge(base, source);
 		} catch (err) {
-			expect((err as StdspecError).code).toBe("DUPLICATE_PATH");
+			expect((err as ToOpenapiError).code).toBe("DUPLICATE_PATH");
 		}
 	});
 
@@ -56,11 +56,11 @@ describe("merge", () => {
 		const base = makeDoc({ components: { schemas: { Task: { type: "object" } } } });
 		const source = makeDoc({ components: { schemas: { Task: { type: "string" } } } });
 
-		expect(() => merge(base, source)).toThrow(StdspecError);
+		expect(() => merge(base, source)).toThrow(ToOpenapiError);
 		try {
 			merge(base, source);
 		} catch (err) {
-			expect((err as StdspecError).code).toBe("DUPLICATE_SCHEMA");
+			expect((err as ToOpenapiError).code).toBe("DUPLICATE_SCHEMA");
 		}
 	});
 
@@ -124,11 +124,11 @@ describe("merge", () => {
 			components: { securitySchemes: { bearerAuth: { type: "http", scheme: "bearer" } } },
 		});
 
-		expect(() => merge(base, source)).toThrow(StdspecError);
+		expect(() => merge(base, source)).toThrow(ToOpenapiError);
 		try {
 			merge(base, source);
 		} catch (err) {
-			expect((err as StdspecError).code).toBe("DUPLICATE_SCHEMA");
+			expect((err as ToOpenapiError).code).toBe("DUPLICATE_SCHEMA");
 		}
 	});
 

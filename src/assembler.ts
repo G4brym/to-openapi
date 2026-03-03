@@ -1,4 +1,4 @@
-import { StdspecError } from "./errors.js";
+import { ToOpenapiError } from "./errors.js";
 import type { SchemaResolver } from "./resolver.js";
 import type {
 	ComponentsObject,
@@ -7,18 +7,18 @@ import type {
 	OperationObject,
 	PathItemObject,
 	SecuritySchemeObject,
-	StdspecDefinition,
+	ToOpenapiDefinition,
 	OpenAPIOptions,
 } from "./types.js";
 
 export interface AssembleInput {
-	info: StdspecDefinition["info"];
+	info: ToOpenapiDefinition["info"];
 	openapiVersion: "3.0.3" | "3.1.0";
-	servers?: StdspecDefinition["servers"];
-	security?: StdspecDefinition["security"];
+	servers?: ToOpenapiDefinition["servers"];
+	security?: ToOpenapiDefinition["security"];
 	securitySchemes?: Record<string, SecuritySchemeObject>;
-	tags?: StdspecDefinition["tags"];
-	externalDocs?: StdspecDefinition["externalDocs"];
+	tags?: ToOpenapiDefinition["tags"];
+	externalDocs?: ToOpenapiDefinition["externalDocs"];
 }
 
 export function assembleDocument(
@@ -35,7 +35,7 @@ export function assembleDocument(
 
 		const pathItem = paths[route.path]!;
 		if (pathItem[route.method]) {
-			throw new StdspecError(
+			throw new ToOpenapiError(
 				"DUPLICATE_PATH",
 				`Duplicate operation: ${route.method.toUpperCase()} ${route.path}`,
 			);

@@ -1,5 +1,5 @@
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
-import type { ResponseObject, RouteDefinition, StdspecPlugin } from "../types.js";
+import type { ResponseObject, RouteDefinition, ToOpenapiPlugin } from "../types.js";
 
 export interface ErrorResponseEntry {
 	status: number;
@@ -7,7 +7,7 @@ export interface ErrorResponseEntry {
 	description?: string;
 }
 
-export function errorResponses(errors: ErrorResponseEntry[]): StdspecPlugin {
+export function errorResponses(errors: ErrorResponseEntry[]): ToOpenapiPlugin {
 	return {
 		name: "errorResponses",
 

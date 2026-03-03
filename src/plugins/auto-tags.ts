@@ -1,10 +1,10 @@
-import type { RouteDefinition, StdspecPlugin } from "../types.js";
+import type { RouteDefinition, ToOpenapiPlugin } from "../types.js";
 
 export interface AutoTagsOptions {
 	prefix?: string;
 }
 
-export function autoTags(options: AutoTagsOptions = {}): StdspecPlugin {
+export function autoTags(options: AutoTagsOptions = {}): ToOpenapiPlugin {
 	return {
 		name: "autoTags",
 

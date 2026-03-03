@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { SchemaResolver } from "../../src/resolver";
-import { StdspecError } from "../../src/errors";
+import { ToOpenapiError } from "../../src/errors";
 import { createMockSchema, createMockObjectSchema } from "../helpers/mock-schemas";
 
 describe("SchemaResolver", () => {
@@ -15,11 +15,11 @@ describe("SchemaResolver", () => {
 
 	it("throws for unknown named schema", () => {
 		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
-		expect(() => resolver.resolve("Unknown")).toThrow(StdspecError);
+		expect(() => resolver.resolve("Unknown")).toThrow(ToOpenapiError);
 		try {
 			resolver.resolve("Unknown");
 		} catch (err) {
-			expect((err as StdspecError).code).toBe("SCHEMA_RESOLUTION_FAILED");
+			expect((err as ToOpenapiError).code).toBe("SCHEMA_RESOLUTION_FAILED");
 		}
 	});
 
@@ -146,11 +146,11 @@ describe("SchemaResolver", () => {
 			},
 		};
 
-		expect(() => resolver.resolve(schema)).toThrow(StdspecError);
+		expect(() => resolver.resolve(schema)).toThrow(ToOpenapiError);
 		try {
 			resolver.resolve(schema);
 		} catch (err) {
-			expect((err as StdspecError).code).toBe("SCHEMA_RESOLUTION_FAILED");
+			expect((err as ToOpenapiError).code).toBe("SCHEMA_RESOLUTION_FAILED");
 		}
 	});
 

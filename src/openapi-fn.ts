@@ -9,12 +9,12 @@ import type {
 	OperationObject,
 	ParsedRoute,
 	RouteDefinition,
-	StdspecDefinition,
-	StdspecPlugin,
+	ToOpenapiDefinition,
+	ToOpenapiPlugin,
 } from "./types.js";
 import { deepFreeze } from "./utils.js";
 
-export function openapi(definition: StdspecDefinition): OpenAPIDocument {
+export function openapi(definition: ToOpenapiDefinition): OpenAPIDocument {
 	const openapiVersion = definition.openapi ?? "3.1.0";
 	const resolver = new SchemaResolver({ openapiVersion });
 	const plugins = definition.plugins ?? [];
@@ -73,7 +73,7 @@ export function openapi(definition: StdspecDefinition): OpenAPIDocument {
 }
 
 function runTransformRoute(
-	plugins: StdspecPlugin[],
+	plugins: ToOpenapiPlugin[],
 	route: RouteDefinition,
 ): RouteDefinition {
 	let result = route;
@@ -86,7 +86,7 @@ function runTransformRoute(
 }
 
 function runTransformDocument(
-	plugins: StdspecPlugin[],
+	plugins: ToOpenapiPlugin[],
 	doc: OpenAPIDocument,
 ): OpenAPIDocument {
 	let result = doc;

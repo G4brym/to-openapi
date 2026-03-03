@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { assembleDocument } from "../../src/assembler";
-import { StdspecError } from "../../src/errors";
+import { ToOpenapiError } from "../../src/errors";
 import { SchemaResolver } from "../../src/resolver";
 import { createMockSchema } from "../helpers/mock-schemas";
 import type { OperationObject } from "../../src/types";
@@ -54,7 +54,7 @@ describe("assembleDocument", () => {
 		expect(doc.paths["/tasks"]?.post).toEqual(postOp);
 	});
 
-	it("throws StdspecError on duplicate method+path", () => {
+	it("throws ToOpenapiError on duplicate method+path", () => {
 		const resolver = makeResolver();
 		const op: OperationObject = { operationId: "get_tasks" };
 		expect(() =>
@@ -66,7 +66,7 @@ describe("assembleDocument", () => {
 				],
 				resolver,
 			),
-		).toThrow(StdspecError);
+		).toThrow(ToOpenapiError);
 
 		try {
 			assembleDocument(
@@ -78,7 +78,7 @@ describe("assembleDocument", () => {
 				resolver,
 			);
 		} catch (err) {
-			expect((err as StdspecError).code).toBe("DUPLICATE_PATH");
+			expect((err as ToOpenapiError).code).toBe("DUPLICATE_PATH");
 		}
 	});
 

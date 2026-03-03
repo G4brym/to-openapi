@@ -11,7 +11,7 @@ import type {
 	ParsedRoute,
 	RouteDefinition,
 	RouteShorthand,
-	StdspecPlugin,
+	ToOpenapiPlugin,
 } from "./types.js";
 import { deepFreeze } from "./utils.js";
 
@@ -19,7 +19,7 @@ export class OpenAPI {
 	private readonly options: OpenAPIOptions;
 	private readonly openapiVersion: "3.0.3" | "3.1.0";
 	private readonly resolver: SchemaResolver;
-	private readonly plugins: StdspecPlugin[];
+	private readonly plugins: ToOpenapiPlugin[];
 	private readonly routes: { method: HttpMethod; path: string; definition: RouteShorthand }[] = [];
 
 	constructor(options: OpenAPIOptions) {

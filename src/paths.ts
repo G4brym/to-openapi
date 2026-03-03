@@ -1,4 +1,4 @@
-import { StdspecError } from "./errors.js";
+import { ToOpenapiError } from "./errors.js";
 import type { HttpMethod, ParsedRoute } from "./types.js";
 
 const VALID_METHODS = new Set<string>([
@@ -17,7 +17,7 @@ export function parseRouteKey(key: string): ParsedRoute {
 	const spaceIndex = trimmed.search(/\s+/);
 
 	if (spaceIndex === -1) {
-		throw new StdspecError(
+		throw new ToOpenapiError(
 			"INVALID_ROUTE_KEY",
 			`Invalid route key "${key}": expected "METHOD /path" format`,
 		);
@@ -28,14 +28,14 @@ export function parseRouteKey(key: string): ParsedRoute {
 
 	const method = rawMethod.toLowerCase();
 	if (!VALID_METHODS.has(method)) {
-		throw new StdspecError(
+		throw new ToOpenapiError(
 			"INVALID_ROUTE_KEY",
 			`Invalid HTTP method "${rawMethod}" in route key "${key}"`,
 		);
 	}
 
 	if (!rawPath.startsWith("/")) {
-		throw new StdspecError(
+		throw new ToOpenapiError(
 			"INVALID_ROUTE_KEY",
 			`Invalid path "${rawPath}" in route key "${key}": path must start with "/"`,
 		);

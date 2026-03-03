@@ -6,8 +6,8 @@ import { merge } from "../../src/merge";
 import { extend } from "../../src/extend";
 import type {
 	OpenAPIDocument,
-	StdspecDefinition,
-	StdspecPlugin,
+	ToOpenapiDefinition,
+	ToOpenapiPlugin,
 	RouteShorthand,
 	HttpMethod,
 } from "../../src/types";
@@ -29,11 +29,11 @@ describe("type-level inference", () => {
 		expectTypeOf(extend).returns.toEqualTypeOf<StandardJSONSchemaV1>();
 	});
 
-	it("StdspecDefinition accepts valid definition", () => {
+	it("ToOpenapiDefinition accepts valid definition", () => {
 		expectTypeOf<{
 			info: { title: string; version: string };
 			paths: Record<string, RouteShorthand>;
-		}>().toMatchTypeOf<StdspecDefinition>();
+		}>().toMatchTypeOf<ToOpenapiDefinition>();
 	});
 
 	it("HttpMethod is a union of 8 methods", () => {
@@ -47,8 +47,8 @@ describe("type-level inference", () => {
 		expectTypeOf<"trace">().toMatchTypeOf<HttpMethod>();
 	});
 
-	it("StdspecPlugin has correct shape", () => {
-		expectTypeOf<{ name: string }>().toMatchTypeOf<StdspecPlugin>();
+	it("ToOpenapiPlugin has correct shape", () => {
+		expectTypeOf<{ name: string }>().toMatchTypeOf<ToOpenapiPlugin>();
 	});
 
 	it("OpenAPI class methods return this for chaining", () => {

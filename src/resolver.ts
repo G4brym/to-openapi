@@ -1,5 +1,5 @@
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
-import { StdspecError } from "./errors.js";
+import { ToOpenapiError } from "./errors.js";
 import type { ReferenceObject, SchemaOrRef } from "./types.js";
 
 export class SchemaResolver {
@@ -23,7 +23,7 @@ export class SchemaResolver {
 	resolve(schemaOrName: StandardJSONSchemaV1 | string): SchemaOrRef {
 		if (typeof schemaOrName === "string") {
 			if (!this.namedSchemas.has(schemaOrName)) {
-				throw new StdspecError(
+				throw new ToOpenapiError(
 					"SCHEMA_RESOLUTION_FAILED",
 					`Named schema "${schemaOrName}" not found`,
 				);
@@ -90,7 +90,7 @@ export class SchemaResolver {
 			this.resolvedCache.set(schema, result);
 			return result;
 		} catch (err) {
-			throw new StdspecError(
+			throw new ToOpenapiError(
 				"SCHEMA_RESOLUTION_FAILED",
 				`Failed to resolve schema: ${err instanceof Error ? err.message : String(err)}`,
 			);

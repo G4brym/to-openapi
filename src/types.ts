@@ -182,7 +182,7 @@ export interface ParsedRoute {
 
 // ─── Plugin ─────────────────────────────────────────────────────────────────
 
-export interface StdspecPlugin {
+export interface ToOpenapiPlugin {
 	name: string;
 	transformRoute?: (route: RouteDefinition) => RouteDefinition;
 	transformSchema?: (schema: SchemaOrRef, context: SchemaContext) => SchemaOrRef;
@@ -191,11 +191,11 @@ export interface StdspecPlugin {
 
 // ─── Declarative Definition ─────────────────────────────────────────────────
 
-export interface StdspecDefinition {
+export interface ToOpenapiDefinition {
 	info: InfoObject;
 	paths: Record<string, RouteShorthand>;
 	schemas?: Record<string, StandardJSONSchemaV1>;
-	plugins?: StdspecPlugin[];
+	plugins?: ToOpenapiPlugin[];
 	openapi?: "3.0.3" | "3.1.0";
 	servers?: ServerObject[];
 	security?: SecurityRequirementObject[];
@@ -214,5 +214,5 @@ export interface OpenAPIOptions {
 	securitySchemes?: Record<string, SecuritySchemeObject>;
 	tags?: TagObject[];
 	externalDocs?: ExternalDocsObject;
-	plugins?: StdspecPlugin[];
+	plugins?: ToOpenapiPlugin[];
 }

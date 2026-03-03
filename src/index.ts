@@ -2,8 +2,8 @@ export { openapi } from "./openapi-fn.js";
 export { OpenAPI } from "./openapi-class.js";
 export { merge } from "./merge.js";
 export { extend } from "./extend.js";
-export { StdspecError } from "./errors.js";
-export type { StdspecErrorCode } from "./errors.js";
+export { ToOpenapiError } from "./errors.js";
+export type { ToOpenapiErrorCode } from "./errors.js";
 export type {
 	HttpMethod,
 	ReferenceObject,
@@ -26,7 +26,7 @@ export type {
 	RouteShorthand,
 	RouteDefinition,
 	ParsedRoute,
-	StdspecPlugin,
-	StdspecDefinition,
+	ToOpenapiPlugin,
+	ToOpenapiDefinition,
 	OpenAPIOptions,
 } from "./types.js";

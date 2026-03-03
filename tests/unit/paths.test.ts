@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseRouteKey } from "../../src/paths";
-import { StdspecError } from "../../src/errors";
+import { ToOpenapiError } from "../../src/errors";
 
 describe("parseRouteKey", () => {
 	it("parses simple GET route", () => {
@@ -56,25 +56,25 @@ describe("parseRouteKey", () => {
 	});
 
 	it("throws INVALID_ROUTE_KEY for missing method", () => {
-		expect(() => parseRouteKey("/tasks")).toThrow(StdspecError);
+		expect(() => parseRouteKey("/tasks")).toThrow(ToOpenapiError);
 		try {
 			parseRouteKey("/tasks");
 		} catch (err) {
-			expect((err as StdspecError).code).toBe("INVALID_ROUTE_KEY");
+			expect((err as ToOpenapiError).code).toBe("INVALID_ROUTE_KEY");
 		}
 	});
 
 	it("throws INVALID_ROUTE_KEY for invalid method", () => {
-		expect(() => parseRouteKey("INVALID /tasks")).toThrow(StdspecError);
+		expect(() => parseRouteKey("INVALID /tasks")).toThrow(ToOpenapiError);
 		try {
 			parseRouteKey("INVALID /tasks");
 		} catch (err) {
-			expect((err as StdspecError).code).toBe("INVALID_ROUTE_KEY");
+			expect((err as ToOpenapiError).code).toBe("INVALID_ROUTE_KEY");
 		}
 	});
 
 	it("throws INVALID_ROUTE_KEY for path not starting with /", () => {
-		expect(() => parseRouteKey("GET tasks")).toThrow(StdspecError);
+		expect(() => parseRouteKey("GET tasks")).toThrow(ToOpenapiError);
 	});
 
 	it("handles extra whitespace between method and path", () => {
@@ -88,7 +88,7 @@ describe("parseRouteKey", () => {
 	});
 
 	it("throws for empty string", () => {
-		expect(() => parseRouteKey("")).toThrow(StdspecError);
+		expect(() => parseRouteKey("")).toThrow(ToOpenapiError);
 	});
 
 	it("handles deeply nested path", () => {

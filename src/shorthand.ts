@@ -10,12 +10,12 @@ import type {
 	RouteShorthand,
 	SchemaContext,
 	SchemaOrRef,
-	StdspecPlugin,
+	ToOpenapiPlugin,
 } from "./types.js";
 import { isFullRequestBodyObject, isFullResponseObject, isStandardJSONSchema } from "./utils.js";
 
 function runTransformSchema(
-	plugins: StdspecPlugin[],
+	plugins: ToOpenapiPlugin[],
 	schema: SchemaOrRef,
 	context: SchemaContext,
 ): SchemaOrRef {
@@ -32,7 +32,7 @@ export function expandRoute(
 	parsed: ParsedRoute,
 	definition: RouteShorthand,
 	resolver: SchemaResolver,
-	plugins: StdspecPlugin[] = [],
+	plugins: ToOpenapiPlugin[] = [],
 ): OperationObject {
 	const operation: OperationObject = {};
 	const parameters: ParameterObject[] = [];
@@ -172,7 +172,7 @@ function expandHeaderParams(
 function expandBody(
 	body: StandardJSONSchemaV1 | RequestBodyObject,
 	resolver: SchemaResolver,
-	plugins: StdspecPlugin[],
+	plugins: ToOpenapiPlugin[],
 ): RequestBodyObject {
 	if (isFullRequestBodyObject(body)) {
 		return body as RequestBodyObject;
@@ -190,7 +190,7 @@ function expandBody(
 function expandResponses(
 	definition: RouteShorthand,
 	resolver: SchemaResolver,
-	plugins: StdspecPlugin[],
+	plugins: ToOpenapiPlugin[],
 ): Record<string, ResponseObject> {
 	const responses: Record<string, ResponseObject> = {};
 

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { openapi } from "../../src/openapi-fn";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
-import type { StdspecDefinition, StdspecPlugin } from "../../src/types";
+import type { ToOpenapiDefinition, ToOpenapiPlugin } from "../../src/types";
 
-const baseDefinition: StdspecDefinition = {
+const baseDefinition: ToOpenapiDefinition = {
 	info: { title: "Test API", version: "1.0.0" },
 	paths: {},
 };
@@ -84,7 +84,7 @@ describe("openapi()", () => {
 	});
 
 	it("runs transformRoute plugins", () => {
-		const plugin: StdspecPlugin = {
+		const plugin: ToOpenapiPlugin = {
 			name: "test-plugin",
 			transformRoute: (route) => ({
 				...route,
@@ -104,7 +104,7 @@ describe("openapi()", () => {
 	});
 
 	it("runs transformDocument plugins", () => {
-		const plugin: StdspecPlugin = {
+		const plugin: ToOpenapiPlugin = {
 			name: "test-plugin",
 			transformDocument: (doc) => ({
 				...doc,
@@ -122,7 +122,7 @@ describe("openapi()", () => {
 	});
 
 	it("uses plugin-modified path for output and path params", () => {
-		const prefixPlugin: StdspecPlugin = {
+		const prefixPlugin: ToOpenapiPlugin = {
 			name: "prefix",
 			transformRoute: (route) => ({
 				...route,
@@ -170,7 +170,7 @@ describe("openapi()", () => {
 	});
 
 	it("runs transformSchema on body and response schemas", () => {
-		const stripInternal: StdspecPlugin = {
+		const stripInternal: ToOpenapiPlugin = {
 			name: "strip-internal",
 			transformSchema: (schema, context) => {
 				if ("$ref" in schema) return schema;

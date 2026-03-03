@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { OpenAPI } from "../../src/openapi-class";
 import { openapi } from "../../src/openapi-fn";
 import { createMockObjectSchema, createMockSchema } from "../helpers/mock-schemas";
-import type { StdspecPlugin } from "../../src/types";
+import type { ToOpenapiPlugin } from "../../src/types";
 
 describe("OpenAPI class", () => {
 	it("produces a minimal valid document", () => {
@@ -81,7 +81,7 @@ describe("OpenAPI class", () => {
 	});
 
 	it("runs plugins", () => {
-		const plugin: StdspecPlugin = {
+		const plugin: ToOpenapiPlugin = {
 			name: "test-plugin",
 			transformRoute: (route) => ({ ...route, tags: ["auto"] }),
 		};
@@ -97,7 +97,7 @@ describe("OpenAPI class", () => {
 	});
 
 	it("uses plugin-modified path for output and path params", () => {
-		const prefixPlugin: StdspecPlugin = {
+		const prefixPlugin: ToOpenapiPlugin = {
 			name: "prefix",
 			transformRoute: (route) => ({
 				...route,

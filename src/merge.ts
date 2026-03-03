@@ -1,4 +1,4 @@
-import { StdspecError } from "./errors.js";
+import { ToOpenapiError } from "./errors.js";
 import type {
 	ComponentsObject,
 	OpenAPIDocument,
@@ -34,7 +34,7 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 			for (const method of methods) {
 				if (pathItem[method]) {
 					if (existing[method]) {
-						throw new StdspecError(
+						throw new ToOpenapiError(
 							"DUPLICATE_PATH",
 							`Duplicate operation: ${method.toUpperCase()} ${pathKey}`,
 						);
@@ -47,7 +47,7 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 		if (source.components?.schemas) {
 			for (const [name, schema] of Object.entries(source.components.schemas)) {
 				if (componentSchemas[name]) {
-					throw new StdspecError(
+					throw new ToOpenapiError(
 						"DUPLICATE_SCHEMA",
 						`Duplicate component schema: "${name}"`,
 					);
@@ -59,7 +59,7 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 		if (source.components?.securitySchemes) {
 			for (const [name, scheme] of Object.entries(source.components.securitySchemes)) {
 				if (securitySchemes[name]) {
-					throw new StdspecError("DUPLICATE_SCHEMA", `Duplicate security scheme: "${name}"`);
+					throw new ToOpenapiError("DUPLICATE_SCHEMA", `Duplicate security scheme: "${name}"`);
 				}
 				securitySchemes[name] = scheme;
 			}
