@@ -28,9 +28,6 @@ export function bearerAuth(options: BearerAuthOptions = {}): StdspecPlugin {
 		},
 
 		transformDocument(doc: OpenAPIDocument): OpenAPIDocument {
-			const existingSchemes = doc.components?.securitySchemes ?? {};
-			const existingSchemas = doc.components?.schemas;
-
 			const securityScheme = {
 				type: "http" as const,
 				scheme: "bearer",
@@ -42,9 +39,8 @@ export function bearerAuth(options: BearerAuthOptions = {}): StdspecPlugin {
 				...doc,
 				components: {
 					...doc.components,
-					...(existingSchemas ? { schemas: existingSchemas } : {}),
 					securitySchemes: {
-						...existingSchemes,
+						...(doc.components?.securitySchemes ?? {}),
 						[schemeName]: securityScheme,
 					},
 				},

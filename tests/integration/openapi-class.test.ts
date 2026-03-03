@@ -96,6 +96,32 @@ describe("OpenAPI class", () => {
 		expect(doc.paths["/tasks"]?.get?.tags).toEqual(["auto"]);
 	});
 
+	it("uses plugin-modified path for output and path params", () => {
+		const prefixPlugin: StdspecPlugin = {
+			name: "prefix",
+			transformRoute: (route) => ({
+				...route,
+				path: `/v1${route.path}`,
+			}),
+		};
+
+		const api = new OpenAPI({
+			info: { title: "Test", version: "1.0.0" },
+			plugins: [prefixPlugin],
+		});
+		api.route("get", "/tasks/:id", { 200: null });
+
+		const doc = api.document();
+
+		expect(doc.paths["/v1/tasks/{id}"]).toBeDefined();
+		expect(doc.paths["/tasks/{id}"]).toBeUndefined();
+
+		const params = doc.paths["/v1/tasks/{id}"]?.get?.parameters;
+		expect(params).toHaveLength(1);
+		expect(params![0]!.name).toBe("id");
+		expect(params![0]!.in).toBe("path");
+	});
+
 	describe("equivalence with openapi()", () => {
 		it("produces equivalent output for same input", () => {
 			const taskSchema = createMockSchema({ type: "object", properties: { id: { type: "string" } } });

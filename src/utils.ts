@@ -45,7 +45,8 @@ export function isStandardJSONSchema(value: unknown): boolean {
 	if (std === null || typeof std !== "object") {
 		return false;
 	}
-	return typeof (std as Record<string, unknown>).jsonSchema === "object";
+	const jsonSchema = (std as Record<string, unknown>).jsonSchema;
+	return jsonSchema !== null && typeof jsonSchema === "object";
 }
 
 export function isFullResponseObject(value: unknown): boolean {

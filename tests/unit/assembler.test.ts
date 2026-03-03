@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { assembleDocument } from "../../src/assembler";
+import { StdspecError } from "../../src/errors";
 import { SchemaResolver } from "../../src/resolver";
 import { createMockSchema } from "../helpers/mock-schemas";
 import type { OperationObject } from "../../src/types";
@@ -53,7 +54,7 @@ describe("assembleDocument", () => {
 		expect(doc.paths["/tasks"]?.post).toEqual(postOp);
 	});
 
-	it("throws on duplicate method+path", () => {
+	it("throws StdspecError on duplicate method+path", () => {
 		const resolver = makeResolver();
 		const op: OperationObject = { operationId: "get_tasks" };
 		expect(() =>
@@ -65,7 +66,20 @@ describe("assembleDocument", () => {
 				],
 				resolver,
 			),
-		).toThrow(/Duplicate operation/);
+		).toThrow(StdspecError);
+
+		try {
+			assembleDocument(
+				{ info: baseInfo, openapiVersion: "3.1.0" },
+				[
+					{ method: "get", path: "/tasks", operation: op },
+					{ method: "get", path: "/tasks", operation: op },
+				],
+				resolver,
+			);
+		} catch (err) {
+			expect((err as StdspecError).code).toBe("DUPLICATE_PATH");
+		}
 	});
 
 	it("populates components.schemas from resolver", () => {

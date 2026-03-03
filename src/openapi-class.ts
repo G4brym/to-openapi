@@ -1,5 +1,6 @@
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { assembleDocument } from "./assembler.js";
+import { extractPathParams } from "./paths.js";
 import { SchemaResolver } from "./resolver.js";
 import { expandRoute } from "./shorthand.js";
 import type {
@@ -42,12 +43,6 @@ export class OpenAPI {
 		const assembled: { method: HttpMethod; path: string; operation: OperationObject }[] = [];
 
 		for (const route of this.routes) {
-			const parsed: ParsedRoute = {
-				method: route.method,
-				path: route.path,
-				pathParams: extractPathParams(route.path),
-			};
-
 			let routeDef: RouteDefinition = {
 				...route.definition,
 				method: route.method,
@@ -56,8 +51,14 @@ export class OpenAPI {
 
 			routeDef = this.runTransformRoute(routeDef);
 
-			const operation = expandRoute(parsed, routeDef, this.resolver);
-			assembled.push({ method: route.method, path: route.path, operation });
+			const finalParsed: ParsedRoute = {
+				method: route.method,
+				path: routeDef.path,
+				pathParams: extractPathParams(routeDef.path),
+			};
+
+			const operation = expandRoute(finalParsed, routeDef, this.resolver, this.plugins);
+			assembled.push({ method: finalParsed.method, path: routeDef.path, operation });
 		}
 
 		let doc = assembleDocument(
@@ -102,14 +103,4 @@ export class OpenAPI {
 
 function normalizePath(path: string): string {
 	return path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (_match, param: string) => `{${param}}`);
-}
-
-function extractPathParams(path: string): string[] {
-	const params: string[] = [];
-	const regex = /\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g;
-	let match: RegExpExecArray | null;
-	while ((match = regex.exec(path)) !== null) {
-		params.push(match[1]!);
-	}
-	return params;
 }

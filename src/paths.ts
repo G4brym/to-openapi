@@ -63,3 +63,13 @@ export function parseRouteKey(key: string): ParsedRoute {
 		pathParams,
 	};
 }
+
+export function extractPathParams(path: string): string[] {
+	const params: string[] = [];
+	const regex = /\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g;
+	let match: RegExpExecArray | null;
+	while ((match = regex.exec(path)) !== null) {
+		params.push(match[1]!);
+	}
+	return params;
+}

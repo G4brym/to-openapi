@@ -1,3 +1,4 @@
+import { StdspecError } from "./errors.js";
 import type { SchemaResolver } from "./resolver.js";
 import type {
 	ComponentsObject,
@@ -34,7 +35,8 @@ export function assembleDocument(
 
 		const pathItem = paths[route.path]!;
 		if (pathItem[route.method]) {
-			throw new Error(
+			throw new StdspecError(
+				"DUPLICATE_PATH",
 				`Duplicate operation: ${route.method.toUpperCase()} ${route.path}`,
 			);
 		}

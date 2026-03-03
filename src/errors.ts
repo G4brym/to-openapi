@@ -10,6 +10,7 @@ export class StdspecError extends Error {
 
 	constructor(code: StdspecErrorCode, message: string) {
 		super(message);
+		Object.setPrototypeOf(this, new.target.prototype);
 		this.name = "StdspecError";
 		this.code = code;
 	}

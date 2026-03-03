@@ -58,9 +58,10 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 
 		if (source.components?.securitySchemes) {
 			for (const [name, scheme] of Object.entries(source.components.securitySchemes)) {
-				if (!securitySchemes[name]) {
-					securitySchemes[name] = scheme;
+				if (securitySchemes[name]) {
+					throw new StdspecError("DUPLICATE_SCHEMA", `Duplicate security scheme: "${name}"`);
 				}
+				securitySchemes[name] = scheme;
 			}
 		}
 
@@ -106,6 +107,13 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 
 	if (base.security) {
 		doc.security = base.security;
+	} else {
+		for (const source of sources) {
+			if (source.security) {
+				doc.security = source.security;
+				break;
+			}
+		}
 	}
 
 	if (tags) {

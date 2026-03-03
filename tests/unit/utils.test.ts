@@ -111,6 +111,10 @@ describe("isStandardJSONSchema", () => {
 		expect(isStandardJSONSchema(42)).toBe(false);
 		expect(isStandardJSONSchema(undefined)).toBe(false);
 	});
+
+	it("returns false when jsonSchema is null", () => {
+		expect(isStandardJSONSchema({ "~standard": { jsonSchema: null } })).toBe(false);
+	});
 });
 
 describe("isFullResponseObject", () => {

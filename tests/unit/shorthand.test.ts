@@ -273,6 +273,27 @@ describe("expandRoute", () => {
 		});
 	});
 
+	describe("$ref handling in param expansion", () => {
+		it("expands query params even when schema is promoted to $ref", () => {
+			const resolver = makeResolver();
+			const query = createMockObjectSchema(
+				{ page: { type: "integer" }, limit: { type: "integer" } },
+				["page"],
+			);
+
+			// First use: inlined
+			const op1 = expandRoute(makeParsed({ method: "get", path: "/tasks" }), { query }, resolver);
+			expect(op1.parameters).toHaveLength(2);
+
+			// Second use: would be promoted to $ref internally, but params should still expand
+			const op2 = expandRoute(makeParsed({ method: "get", path: "/users" }), { query }, resolver);
+			expect(op2.parameters).toHaveLength(2);
+			expect(op2.parameters![0]!.name).toBe("page");
+			expect(op2.parameters![0]!.required).toBe(true);
+			expect(op2.parameters![1]!.name).toBe("limit");
+		});
+	});
+
 	describe("combined parameters", () => {
 		it("combines query, path, and header parameters", () => {
 			const resolver = makeResolver();

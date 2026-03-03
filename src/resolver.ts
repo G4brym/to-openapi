@@ -44,13 +44,20 @@ export class SchemaResolver {
 		this.usageCount.set(schema, count);
 
 		if (count >= 2) {
-			const name = this.autoName(schema);
+			let name = this.autoName(schema);
+			while (this.namedSchemas.has(name) && this.namedSchemas.get(name) !== schema) {
+				name = `${name}_${this.autoNameCounter++}`;
+			}
 			this.schemaIdentity.set(schema, name);
 			this.namedSchemas.set(name, schema);
 			this.ensureComponentResolved(name);
 			return { $ref: `#/components/schemas/${name}` };
 		}
 
+		return this.resolveSchema(schema);
+	}
+
+	resolveInline(schema: StandardJSONSchemaV1): Record<string, unknown> {
 		return this.resolveSchema(schema);
 	}
 
@@ -94,18 +101,19 @@ export class SchemaResolver {
 		const vendor = schema["~standard"].vendor;
 		if (vendor && vendor !== "mock") {
 			const vendorName = vendor.replace(/[^a-zA-Z0-9]/g, "_");
-			const candidate = `${vendorName}_Schema_${this.autoNameCounter++}`;
+			const candidate = `${vendorName}_Schema_${this.autoNameCounter}`;
 			if (!this.namedSchemas.has(candidate)) {
+				this.autoNameCounter++;
 				return candidate;
 			}
+			this.autoNameCounter++;
 		}
 
 		return `Schema_${this.hash(schema)}`;
 	}
 
 	private hash(schema: StandardJSONSchemaV1): string {
-		const target = this.openapiVersion === "3.0.3" ? "openapi-3.0" : "draft-2020-12";
-		const resolved = schema["~standard"].jsonSchema.input({ target });
+		const resolved = this.resolveSchema(schema);
 		const str = JSON.stringify(resolved);
 		let h = 0;
 		for (let i = 0; i < str.length; i++) {

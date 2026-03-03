@@ -108,6 +108,30 @@ describe("merge", () => {
 		expect(result.security).toEqual([{ bearerAuth: [] }]);
 	});
 
+	it("uses security from first source when base has none", () => {
+		const base = makeDoc();
+		const source = makeDoc({ security: [{ apiKey: [] }] });
+
+		const result = merge(base, source);
+		expect(result.security).toEqual([{ apiKey: [] }]);
+	});
+
+	it("throws on duplicate securitySchemes", () => {
+		const base = makeDoc({
+			components: { securitySchemes: { bearerAuth: { type: "http", scheme: "bearer" } } },
+		});
+		const source = makeDoc({
+			components: { securitySchemes: { bearerAuth: { type: "http", scheme: "bearer" } } },
+		});
+
+		expect(() => merge(base, source)).toThrow(StdspecError);
+		try {
+			merge(base, source);
+		} catch (err) {
+			expect((err as StdspecError).code).toBe("DUPLICATE_SCHEMA");
+		}
+	});
+
 	it("merges multiple sources", () => {
 		const base = makeDoc({ paths: { "/a": { get: { operationId: "a" } } } });
 		const s1 = makeDoc({ paths: { "/b": { get: { operationId: "b" } } } });

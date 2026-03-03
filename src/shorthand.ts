@@ -8,14 +8,31 @@ import type {
 	RequestBodyObject,
 	ResponseObject,
 	RouteShorthand,
+	SchemaContext,
 	SchemaOrRef,
+	StdspecPlugin,
 } from "./types.js";
 import { isFullRequestBodyObject, isFullResponseObject, isStandardJSONSchema } from "./utils.js";
+
+function runTransformSchema(
+	plugins: StdspecPlugin[],
+	schema: SchemaOrRef,
+	context: SchemaContext,
+): SchemaOrRef {
+	let result = schema;
+	for (const plugin of plugins) {
+		if (plugin.transformSchema) {
+			result = plugin.transformSchema(result, context);
+		}
+	}
+	return result;
+}
 
 export function expandRoute(
 	parsed: ParsedRoute,
 	definition: RouteShorthand,
 	resolver: SchemaResolver,
+	plugins: StdspecPlugin[] = [],
 ): OperationObject {
 	const operation: OperationObject = {};
 	const parameters: ParameterObject[] = [];
@@ -39,10 +56,10 @@ export function expandRoute(
 	}
 
 	if (definition.body !== undefined) {
-		operation.requestBody = expandBody(definition.body, resolver);
+		operation.requestBody = expandBody(definition.body, resolver, plugins);
 	}
 
-	const responses = expandResponses(definition, resolver);
+	const responses = expandResponses(definition, resolver, plugins);
 	if (Object.keys(responses).length > 0) {
 		operation.responses = responses;
 	}
@@ -64,7 +81,7 @@ function expandQueryParams(
 	parameters: ParameterObject[],
 	resolver: SchemaResolver,
 ): void {
-	const resolved = resolver.resolve(schema) as Record<string, unknown>;
+	const resolved = resolver.resolveInline(schema);
 	const properties = resolved.properties as Record<string, unknown> | undefined;
 	if (!properties) return;
 
@@ -89,7 +106,7 @@ function expandPathParams(
 	parameters: ParameterObject[],
 	resolver: SchemaResolver,
 ): void {
-	const resolved = resolver.resolve(schema) as Record<string, unknown>;
+	const resolved = resolver.resolveInline(schema);
 	const properties = resolved.properties as Record<string, unknown> | undefined;
 	const definedParams = new Set<string>();
 
@@ -133,7 +150,7 @@ function expandHeaderParams(
 	parameters: ParameterObject[],
 	resolver: SchemaResolver,
 ): void {
-	const resolved = resolver.resolve(schema) as Record<string, unknown>;
+	const resolved = resolver.resolveInline(schema);
 	const properties = resolved.properties as Record<string, unknown> | undefined;
 	if (!properties) return;
 
@@ -155,12 +172,14 @@ function expandHeaderParams(
 function expandBody(
 	body: StandardJSONSchemaV1 | RequestBodyObject,
 	resolver: SchemaResolver,
+	plugins: StdspecPlugin[],
 ): RequestBodyObject {
 	if (isFullRequestBodyObject(body)) {
 		return body as RequestBodyObject;
 	}
 
-	const schema = resolver.resolve(body as StandardJSONSchemaV1);
+	let schema = resolver.resolve(body as StandardJSONSchemaV1);
+	schema = runTransformSchema(plugins, schema, { location: "body" });
 	return {
 		content: {
 			"application/json": { schema },
@@ -171,6 +190,7 @@ function expandBody(
 function expandResponses(
 	definition: RouteShorthand,
 	resolver: SchemaResolver,
+	plugins: StdspecPlugin[],
 ): Record<string, ResponseObject> {
 	const responses: Record<string, ResponseObject> = {};
 
@@ -189,7 +209,8 @@ function expandResponses(
 		}
 
 		if (typeof value === "string") {
-			const ref = resolver.resolve(value);
+			let ref = resolver.resolve(value);
+			ref = runTransformSchema(plugins, ref, { location: "response" });
 			responses[String(statusCode)] = {
 				description,
 				content: {
@@ -205,7 +226,8 @@ function expandResponses(
 		}
 
 		if (isStandardJSONSchema(value)) {
-			const schema = resolver.resolve(value as StandardJSONSchemaV1);
+			let schema = resolver.resolve(value as StandardJSONSchemaV1);
+			schema = runTransformSchema(plugins, schema, { location: "response" });
 			responses[String(statusCode)] = {
 				description,
 				content: {

@@ -121,6 +121,34 @@ describe("openapi()", () => {
 		expect(doc.info.description).toBe("Plugin added this");
 	});
 
+	it("uses plugin-modified path for output and path params", () => {
+		const prefixPlugin: StdspecPlugin = {
+			name: "prefix",
+			transformRoute: (route) => ({
+				...route,
+				path: `/v1${route.path}`,
+			}),
+		};
+
+		const doc = openapi({
+			...baseDefinition,
+			plugins: [prefixPlugin],
+			paths: {
+				"GET /tasks/:id": { 200: null },
+			},
+		});
+
+		// The output document should have the prefixed path
+		expect(doc.paths["/v1/tasks/{id}"]).toBeDefined();
+		expect(doc.paths["/tasks/{id}"]).toBeUndefined();
+
+		// Path params should still be detected correctly
+		const params = doc.paths["/v1/tasks/{id}"]?.get?.parameters;
+		expect(params).toHaveLength(1);
+		expect(params![0]!.name).toBe("id");
+		expect(params![0]!.in).toBe("path");
+	});
+
 	it("handles multiple routes", () => {
 		const doc = openapi({
 			...baseDefinition,
@@ -139,5 +167,45 @@ describe("openapi()", () => {
 		expect(doc.paths["/tasks/{id}"]?.get).toBeDefined();
 		expect(doc.paths["/tasks/{id}"]?.put).toBeDefined();
 		expect(doc.paths["/tasks/{id}"]?.delete).toBeDefined();
+	});
+
+	it("runs transformSchema on body and response schemas", () => {
+		const stripInternal: StdspecPlugin = {
+			name: "strip-internal",
+			transformSchema: (schema, context) => {
+				if ("$ref" in schema) return schema;
+				const { "x-internal": _, ...rest } = schema as Record<string, unknown>;
+				return rest;
+			},
+		};
+
+		const doc = openapi({
+			...baseDefinition,
+			plugins: [stripInternal],
+			paths: {
+				"POST /tasks": {
+					body: createMockSchema({
+						type: "object",
+						properties: { name: { type: "string" } },
+						"x-internal": true,
+					}),
+					200: createMockSchema({
+						type: "object",
+						properties: { id: { type: "string" } },
+						"x-internal": true,
+					}),
+				},
+			},
+		});
+
+		const bodySchema = (doc.paths["/tasks"]?.post?.requestBody as any)
+			?.content?.["application/json"]?.schema;
+		expect(bodySchema["x-internal"]).toBeUndefined();
+		expect(bodySchema.type).toBe("object");
+
+		const responseSchema = (doc.paths["/tasks"]?.post?.responses?.["200"] as any)
+			?.content?.["application/json"]?.schema;
+		expect(responseSchema["x-internal"]).toBeUndefined();
+		expect(responseSchema.type).toBe("object");
 	});
 });

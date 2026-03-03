@@ -1,18 +1,16 @@
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { assembleDocument } from "./assembler.js";
-import { parseRouteKey } from "./paths.js";
+import { extractPathParams, parseRouteKey } from "./paths.js";
 import { SchemaResolver } from "./resolver.js";
 import { expandRoute } from "./shorthand.js";
 import type {
 	HttpMethod,
 	OpenAPIDocument,
 	OperationObject,
+	ParsedRoute,
 	RouteDefinition,
-	RouteShorthand,
-	SchemaOrRef,
 	StdspecDefinition,
 	StdspecPlugin,
-	SchemaContext,
 } from "./types.js";
 import { deepFreeze } from "./utils.js";
 
@@ -40,11 +38,17 @@ export function openapi(definition: StdspecDefinition): OpenAPIDocument {
 
 		routeDef = runTransformRoute(plugins, routeDef);
 
-		const operation = expandRoute(parsed, routeDef, resolver);
+		const finalParsed: ParsedRoute = {
+			method: parsed.method,
+			path: routeDef.path,
+			pathParams: extractPathParams(routeDef.path),
+		};
+
+		const operation = expandRoute(finalParsed, routeDef, resolver, plugins);
 
 		routes.push({
-			method: parsed.method,
-			path: parsed.path,
+			method: finalParsed.method,
+			path: routeDef.path,
 			operation,
 		});
 	}

@@ -228,4 +228,22 @@ describe("SchemaResolver", () => {
 		const ref = resolver.resolve(schema) as { $ref: string };
 		expect(ref.$ref).toMatch(/zod_Schema_/);
 	});
+
+	it("disambiguates when vendor name collides with existing named schema", () => {
+		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+		// Pre-register a schema with the name that auto-naming would generate
+		const existing = createMockSchema({ type: "object" }, { vendor: "zod" });
+		resolver.registerNamed("zod_Schema_0", existing);
+
+		// Now auto-name a different zod schema — should not collide
+		const schema = createMockSchema({ type: "string" }, { vendor: "zod" });
+		resolver.resolve(schema);
+		const ref = resolver.resolve(schema) as { $ref: string };
+		const name = ref.$ref.split("/").pop()!;
+
+		expect(name).not.toBe("zod_Schema_0");
+		// Should still be in components
+		const components = resolver.getComponents();
+		expect(components[name]).toEqual({ type: "string" });
+	});
 });
