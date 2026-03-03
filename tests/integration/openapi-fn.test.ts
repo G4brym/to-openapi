@@ -259,6 +259,21 @@ describe("openapi()", () => {
 		await assertValidOpenAPI(doc);
 	});
 
+	it("passes vendor extensions to operations", async () => {
+		const doc = openapi({
+			...baseDefinition,
+			paths: {
+				"GET /internal": {
+					"x-internal": true,
+					200: null,
+				},
+			},
+		});
+
+		expect((doc.paths["/internal"]?.get as any)?.["x-internal"]).toBe(true);
+		await assertValidOpenAPI(doc);
+	});
+
 	it("runs transformSchema on body and response schemas", () => {
 		const stripInternal: ToOpenapiPlugin = {
 			name: "strip-internal",

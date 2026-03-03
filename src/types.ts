@@ -141,6 +141,7 @@ export interface OperationObject {
 	requestBody?: RequestBodyObject;
 	responses?: Record<string, ResponseObject | ReferenceObject>;
 	externalDocs?: ExternalDocsObject;
+	[key: `x-${string}`]: unknown;
 }
 
 export interface PathItemObject {
@@ -198,6 +199,7 @@ export interface RouteShorthand {
 	deprecated?: boolean;
 	security?: SecurityRequirementObject[];
 	[statusCode: number]: StandardJSONSchemaV1 | ResponseObject | ResponseShorthandObject | string | null;
+	[key: `x-${string}`]: unknown;
 }
 
 export interface RouteDefinition extends RouteShorthand {

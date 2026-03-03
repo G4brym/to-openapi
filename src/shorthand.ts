@@ -83,6 +83,12 @@ export function expandRoute(
 	if (definition.deprecated) operation.deprecated = definition.deprecated;
 	if (definition.security) operation.security = definition.security;
 
+	for (const key of Object.keys(definition)) {
+		if (key.startsWith("x-")) {
+			(operation as Record<string, unknown>)[key] = (definition as Record<string, unknown>)[key];
+		}
+	}
+
 	operation.operationId = definition.operationId ?? generateOperationId(parsed.method, parsed.path);
 
 	return operation;

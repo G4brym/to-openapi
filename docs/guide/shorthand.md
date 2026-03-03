@@ -64,6 +64,7 @@ The `RouteShorthand` interface accepts the following fields:
 | `deprecated` | `boolean` | Marks the operation as deprecated |
 | `security` | `SecurityRequirementObject[]` | Security requirements for this operation |
 | `[statusCode]` | Schema, `string`, `null`, `ResponseObject`, or `ResponseShorthandObject` | Response for a given HTTP status code (e.g., `200`, `201`, `404`) |
+| `x-*` | `unknown` | Any `x-` prefixed key passes through as a vendor extension on the operation |
 
 ## Full Example
 

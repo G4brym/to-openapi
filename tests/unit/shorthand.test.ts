@@ -501,6 +501,44 @@ describe("expandRoute", () => {
 		});
 	});
 
+	describe("vendor extensions", () => {
+		it("passes through x- prefixed keys to operation", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				"x-internal": true,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			expect((op as any)["x-internal"]).toBe(true);
+		});
+
+		it("passes through multiple x- keys", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				"x-internal": true,
+				"x-rate-limit": 100,
+				"x-custom-meta": { team: "backend" },
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			expect((op as any)["x-internal"]).toBe(true);
+			expect((op as any)["x-rate-limit"]).toBe(100);
+			expect((op as any)["x-custom-meta"]).toEqual({ team: "backend" });
+		});
+
+		it("does not affect normal fields", () => {
+			const resolver = makeResolver();
+			const definition: RouteShorthand = {
+				summary: "Test",
+				"x-internal": true,
+			};
+			const op = expandRoute(makeParsed(), definition, resolver);
+
+			expect(op.summary).toBe("Test");
+			expect((op as any)["x-internal"]).toBe(true);
+		});
+	});
+
 	describe("$ref handling in param expansion", () => {
 		it("expands query params even when schema is promoted to $ref", () => {
 			const resolver = makeResolver();

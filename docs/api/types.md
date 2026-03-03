@@ -317,6 +317,7 @@ interface OperationObject {
   requestBody?: RequestBodyObject
   responses?: Record<string, ResponseObject | ReferenceObject>
   externalDocs?: ExternalDocsObject
+  [key: `x-${string}`]: unknown
 }
 ```
 
@@ -415,6 +416,7 @@ interface RouteShorthand {
   deprecated?: boolean
   security?: SecurityRequirementObject[]
   [statusCode: number]: StandardJSONSchemaV1 | ResponseObject | ResponseShorthandObject | string | null
+  [key: `x-${string}`]: unknown
 }
 ```
 
