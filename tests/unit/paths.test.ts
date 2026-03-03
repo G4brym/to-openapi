@@ -99,6 +99,40 @@ describe("parseRouteKey", () => {
 			pathParams: ["id"],
 		});
 	});
+
+	describe("duplicate path params", () => {
+		it("deduplicates {id} appearing twice in path", () => {
+			const result = parseRouteKey("GET /users/{id}/posts/{id}");
+			expect(result.pathParams).toEqual(["id"]);
+			expect(result.path).toBe("/users/{id}/posts/{id}");
+		});
+
+		it("mixed :id and {id} styles deduplicate and normalize", () => {
+			const result = parseRouteKey("GET /users/:id/posts/{id}");
+			expect(result.pathParams).toEqual(["id"]);
+			expect(result.path).toBe("/users/{id}/posts/{id}");
+		});
+	});
+
+	describe("non-captured patterns", () => {
+		it("empty braces {} are not captured as a param", () => {
+			const result = parseRouteKey("GET /users/{}");
+			expect(result.pathParams).toEqual([]);
+			expect(result.path).toBe("/users/{}");
+		});
+	});
+
+	describe("path preservation", () => {
+		it("dots in path segments are preserved", () => {
+			const result = parseRouteKey("GET /api/v1.0/users");
+			expect(result.path).toBe("/api/v1.0/users");
+		});
+
+		it("trailing slash is preserved", () => {
+			const result = parseRouteKey("GET /tasks/");
+			expect(result.path).toBe("/tasks/");
+		});
+	});
 });
 
 describe("parseWebhookKey", () => {
@@ -123,5 +157,10 @@ describe("parseWebhookKey", () => {
 
 	it("throws on invalid method", () => {
 		expect(() => parseWebhookKey("FETCH orderCreated")).toThrow(ToOpenapiError);
+	});
+
+	it("handles extra whitespace between method and name", () => {
+		const result = parseWebhookKey("POST   orderCreated");
+		expect(result).toEqual({ method: "post", name: "orderCreated" });
 	});
 });

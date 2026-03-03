@@ -604,6 +604,132 @@ describe("expandRoute", () => {
 		});
 	});
 
+	describe("empty schemas produce no parameters", () => {
+		it("query with empty properties emits no parameters", () => {
+			const resolver = makeResolver();
+			const query = createMockObjectSchema({});
+			const op = expandRoute(makeParsed(), { query }, resolver);
+
+			expect(op.parameters).toBeUndefined();
+		});
+
+		it("headers with empty properties emits no parameters", () => {
+			const resolver = makeResolver();
+			const headers = createMockObjectSchema({});
+			const op = expandRoute(makeParsed(), { headers }, resolver);
+
+			expect(op.parameters).toBeUndefined();
+		});
+
+		it("cookies with empty properties emits no parameters", () => {
+			const resolver = makeResolver();
+			const cookies = createMockObjectSchema({});
+			const op = expandRoute(makeParsed(), { cookies }, resolver);
+
+			expect(op.parameters).toBeUndefined();
+		});
+
+		it("params with empty properties + path param retains only auto-detected param", () => {
+			const resolver = makeResolver();
+			const params = createMockObjectSchema({});
+			const parsed = makeParsed({ path: "/items/{id}", pathParams: ["id"] });
+			const op = expandRoute(parsed, { params }, resolver);
+
+			expect(op.parameters).toHaveLength(1);
+			expect(op.parameters?.[0]).toEqual({
+				name: "id",
+				in: "path",
+				required: true,
+				schema: { type: "string" },
+			});
+		});
+	});
+
+	describe("required referencing non-existent property", () => {
+		it("query with required: ['a'] but only property 'b' does not crash", () => {
+			const resolver = makeResolver();
+			const query = createMockSchema({
+				type: "object",
+				properties: { b: { type: "string" } },
+				required: ["a"],
+			});
+			const op = expandRoute(makeParsed(), { query }, resolver);
+
+			expect(op.parameters).toHaveLength(1);
+			expect(op.parameters?.[0]?.name).toBe("b");
+			expect(op.parameters?.[0]?.required).toBeUndefined();
+		});
+	});
+
+	describe("deprecated false not propagated", () => {
+		it("property with deprecated: false does not set deprecated on parameter", () => {
+			const resolver = makeResolver();
+			const query = createMockObjectSchema({
+				active: { type: "string", deprecated: false },
+			});
+			const op = expandRoute(makeParsed(), { query }, resolver);
+
+			expect(op.parameters?.[0]?.deprecated).toBeUndefined();
+		});
+	});
+
+	describe("status code boundaries", () => {
+		it("100 is included as valid minimum", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { 100: null } as any, resolver);
+			expect(op.responses?.["100"]).toBeDefined();
+		});
+
+		it("599 is included as valid maximum", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { 599: null } as any, resolver);
+			expect(op.responses?.["599"]).toBeDefined();
+		});
+
+		it("99 is skipped (below range)", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { 99: null } as any, resolver);
+			expect(op.responses).toBeUndefined();
+		});
+
+		it("600 is skipped (above range)", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { 600: null } as any, resolver);
+			expect(op.responses).toBeUndefined();
+		});
+	});
+
+	describe("metadata edge cases", () => {
+		it("tags: [] is copied to operation (empty array is truthy)", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { tags: [] }, resolver);
+			expect(op.tags).toEqual([]);
+		});
+
+		it("security: [] is copied to operation (OpenAPI semantics: no auth required)", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { security: [] }, resolver);
+			expect(op.security).toEqual([]);
+		});
+
+		it("deprecated: false is NOT set on operation (falsy)", () => {
+			const resolver = makeResolver();
+			const op = expandRoute(makeParsed(), { deprecated: false } as any, resolver);
+			expect(op.deprecated).toBeUndefined();
+		});
+	});
+
+	describe("body shorthand fallback", () => {
+		it("contentType without schema defaults to { type: 'object' }", () => {
+			const resolver = makeResolver();
+			const body = { contentType: "application/xml" };
+			const op = expandRoute(makeParsed({ method: "post" }), { body: body as any }, resolver);
+
+			const media = (op.requestBody as any)?.content?.["application/xml"];
+			expect(media.schema).toEqual({ type: "object" });
+		});
+	});
+
 	describe("combined parameters", () => {
 		it("combines query, path, header, and cookie parameters", () => {
 			const resolver = makeResolver();

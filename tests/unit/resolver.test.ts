@@ -228,6 +228,62 @@ describe("SchemaResolver", () => {
 		expect(ref.$ref).toMatch(/zod_Schema_/);
 	});
 
+	it("last-registered name wins for dual registration (schemaIdentity overwrite)", () => {
+		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+		const schema = createMockSchema({ type: "string" });
+		resolver.registerNamed("FirstName", schema);
+		resolver.registerNamed("SecondName", schema);
+
+		const result = resolver.resolve(schema);
+		expect(result).toEqual({ $ref: "#/components/schemas/SecondName" });
+	});
+
+	it("mock vendor falls back to hash-based auto-naming", () => {
+		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+		const schema = createMockSchema({ type: "string", minLength: 5 });
+
+		resolver.resolve(schema);
+		const ref = resolver.resolve(schema) as { $ref: string };
+		const name = ref.$ref.split("/").pop()!;
+		expect(name).toMatch(/^Schema_[0-9a-f]{8}$/);
+	});
+
+	it("resolveInline always returns full object, never a $ref", () => {
+		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+		const schema = createMockSchema({ type: "string" });
+		resolver.registerNamed("MyString", schema);
+
+		const result = resolver.resolveInline(schema);
+		expect(result).toEqual({ type: "string" });
+		expect(result).not.toHaveProperty("$ref");
+	});
+
+	it("wraps non-Error throws in ToOpenapiError", () => {
+		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
+		const schema = {
+			"~standard": {
+				version: 1 as const,
+				vendor: "test",
+				jsonSchema: {
+					input: () => {
+						throw "string error";
+					},
+					output: () => {
+						throw "string error";
+					},
+				},
+			},
+		};
+
+		expect(() => resolver.resolve(schema)).toThrow(ToOpenapiError);
+		try {
+			resolver.resolve(schema);
+		} catch (err) {
+			expect((err as ToOpenapiError).code).toBe("SCHEMA_RESOLUTION_FAILED");
+			expect((err as ToOpenapiError).message).toContain("string error");
+		}
+	});
+
 	it("disambiguates when vendor name collides with existing named schema", () => {
 		const resolver = new SchemaResolver({ openapiVersion: "3.1.0" });
 		// Pre-register a schema with the name that auto-naming would generate

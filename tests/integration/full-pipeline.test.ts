@@ -224,6 +224,34 @@ describe("full pipeline", () => {
 		await assertValidOpenAPI(doc);
 	});
 
+	it("route security: [] overrides global security", async () => {
+		const doc = openapi({
+			info: { title: "Security Override", version: "1.0.0" },
+			plugins: [bearerAuth()],
+			paths: {
+				"GET /tasks": { 200: null },
+				"GET /health": { security: [], 200: null },
+			},
+		});
+
+		expect(doc.security).toEqual([{ bearerAuth: [] }]);
+		expect(doc.paths["/tasks"]?.get?.security).toEqual([{ bearerAuth: [] }]);
+		expect(doc.paths["/health"]?.get?.security).toEqual([]);
+		await assertValidOpenAPI(doc);
+	});
+
+	it("special characters in paths produce valid document", async () => {
+		const doc = openapi({
+			info: { title: "Special Chars", version: "1.0.0" },
+			paths: {
+				"GET /api/v1.0/users": { 200: null },
+			},
+		});
+
+		expect(doc.paths["/api/v1.0/users"]).toBeDefined();
+		await assertValidOpenAPI(doc);
+	});
+
 	it("bearerAuth exclude works in full pipeline", async () => {
 		const doc = openapi({
 			info: { title: "Exclude Test", version: "1.0.0" },

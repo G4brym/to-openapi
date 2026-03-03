@@ -186,6 +186,98 @@ describe("merge", () => {
 		expect(result.webhooks?.order?.get).toBeDefined();
 	});
 
+	it("merges empty paths from both documents", () => {
+		const base = makeDoc({ paths: {} });
+		const source = makeDoc({ paths: {} });
+
+		const result = merge(base, source);
+		expect(result.paths).toEqual({});
+	});
+
+	it("merges all 8 HTTP methods on the same path", () => {
+		const base = makeDoc({
+			paths: {
+				"/items": {
+					get: { operationId: "get" },
+					post: { operationId: "post" },
+					put: { operationId: "put" },
+					patch: { operationId: "patch" },
+				},
+			},
+		});
+		const source = makeDoc({
+			paths: {
+				"/items": {
+					delete: { operationId: "delete" },
+					head: { operationId: "head" },
+					options: { operationId: "options" },
+					trace: { operationId: "trace" },
+				},
+			},
+		});
+
+		const result = merge(base, source);
+		const item = result.paths["/items"]!;
+		expect(item.get).toBeDefined();
+		expect(item.post).toBeDefined();
+		expect(item.put).toBeDefined();
+		expect(item.patch).toBeDefined();
+		expect(item.delete).toBeDefined();
+		expect(item.head).toBeDefined();
+		expect(item.options).toBeDefined();
+		expect(item.trace).toBeDefined();
+	});
+
+	it("preserves base tag description on duplicate tag name", () => {
+		const base = makeDoc({ tags: [{ name: "tasks", description: "Base description" }] });
+		const source = makeDoc({ tags: [{ name: "tasks", description: "Source description" }] });
+
+		const result = merge(base, source);
+		expect(result.tags).toHaveLength(1);
+		expect(result.tags?.[0]?.description).toBe("Base description");
+	});
+
+	it("merges securitySchemes without schemas key", () => {
+		const base = makeDoc({
+			components: { securitySchemes: { bearer: { type: "http", scheme: "bearer" } } },
+		});
+		const source = makeDoc({
+			components: { securitySchemes: { apiKey: { type: "apiKey", name: "key", in: "header" } } },
+		});
+
+		const result = merge(base, source);
+		expect(result.components?.securitySchemes?.bearer).toBeDefined();
+		expect(result.components?.securitySchemes?.apiKey).toBeDefined();
+		expect(result.components?.schemas).toBeUndefined();
+	});
+
+	it("uses second source servers when base and first source have none", () => {
+		const base = makeDoc();
+		const s1 = makeDoc();
+		const s2 = makeDoc({ servers: [{ url: "https://s2.com" }] });
+
+		const result = merge(base, s1, s2);
+		expect(result.servers).toEqual([{ url: "https://s2.com" }]);
+	});
+
+	it("uses second source security when base and first source have none", () => {
+		const base = makeDoc();
+		const s1 = makeDoc();
+		const s2 = makeDoc({ security: [{ apiKey: [] }] });
+
+		const result = merge(base, s1, s2);
+		expect(result.security).toEqual([{ apiKey: [] }]);
+	});
+
+	it("merge() output is NOT frozen (unlike openapi() and OpenAPI.document())", () => {
+		const base = makeDoc({ paths: { "/a": { get: { operationId: "a" } } } });
+		const source = makeDoc({ paths: { "/b": { get: { operationId: "b" } } } });
+
+		const result = merge(base, source);
+		expect(Object.isFrozen(result)).toBe(false);
+		expect(Object.isFrozen(result.paths)).toBe(false);
+	});
+
 	it("omits webhooks when none present", () => {
 		const base = makeDoc();
 		const source = makeDoc();

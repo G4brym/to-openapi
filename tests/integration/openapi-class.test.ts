@@ -165,6 +165,30 @@ describe("OpenAPI class", () => {
 		expect(() => api.document()).toThrow("Webhooks are only supported in OpenAPI 3.1.0");
 	});
 
+	it("produces valid document with no routes", async () => {
+		const api = new OpenAPI({ info: { title: "Empty", version: "1.0.0" } });
+		const doc = api.document();
+		expect(doc.paths).toEqual({});
+		await assertValidOpenAPI(doc);
+	});
+
+	it("throws DUPLICATE_PATH when same route registered twice", () => {
+		const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
+		api.route("get", "/tasks", { 200: null });
+		api.route("get", "/tasks", { 200: null });
+
+		expect(() => api.document()).toThrow("Duplicate operation");
+	});
+
+	it("produces document with empty webhook name", async () => {
+		const api = new OpenAPI({ info: { title: "Test", version: "1.0.0" } });
+		api.webhook("post", "", { 200: null });
+
+		const doc = api.document();
+		expect(doc.webhooks?.[""]).toBeDefined();
+		expect(doc.webhooks?.[""]?.post).toBeDefined();
+	});
+
 	describe("equivalence with openapi()", () => {
 		it("produces equivalent output for same input", async () => {
 			const taskSchema = createMockSchema({

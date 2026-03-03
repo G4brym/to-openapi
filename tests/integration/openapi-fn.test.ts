@@ -303,6 +303,33 @@ describe("openapi()", () => {
 		).toThrow("Webhooks are only supported in OpenAPI 3.1.0");
 	});
 
+	it("produces valid document with empty paths", async () => {
+		const doc = openapi({ ...baseDefinition, paths: {} });
+		expect(doc.paths).toEqual({});
+		await assertValidOpenAPI(doc);
+	});
+
+	it("throws DUPLICATE_PATH when plugin rewrites two paths to the same path", () => {
+		const collidingPlugin: ToOpenapiPlugin = {
+			name: "collider",
+			transformRoute: (route) => ({
+				...route,
+				path: "/collision",
+			}),
+		};
+
+		expect(() =>
+			openapi({
+				...baseDefinition,
+				plugins: [collidingPlugin],
+				paths: {
+					"GET /a": { 200: null },
+					"GET /b": { 200: null },
+				},
+			}),
+		).toThrow("Duplicate operation");
+	});
+
 	it("runs transformSchema on body and response schemas", () => {
 		const stripInternal: ToOpenapiPlugin = {
 			name: "strip-internal",
