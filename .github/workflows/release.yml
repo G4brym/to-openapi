@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    if: ${{ github.repository_owner == 'G4brym' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Create release PR or publish
+        uses: changesets/action@v1
+        with:
+          publish: npx changeset publish
+          title: "Version Packages"
+          commit: "Version Packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
