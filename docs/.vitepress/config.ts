@@ -107,14 +107,14 @@ export default defineConfig({
 			],
 		},
 
-		socialLinks: [{ icon: "github", link: "https://github.com/gabemassadas/to-openapi" }],
+		socialLinks: [{ icon: "github", link: "https://github.com/G4brym/to-openapi" }],
 
 		search: {
 			provider: "local",
 		},
 
 		editLink: {
-			pattern: "https://github.com/gabemassadas/to-openapi/edit/main/docs/:path",
+			pattern: "https://github.com/G4brym/to-openapi/edit/main/docs/:path",
 		},
 	},
 });

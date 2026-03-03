@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/to-openapi)](https://www.npmjs.com/package/to-openapi)
 [![npm downloads](https://img.shields.io/npm/dm/to-openapi)](https://www.npmjs.com/package/to-openapi)
-[![license](https://img.shields.io/npm/l/to-openapi)](https://github.com/gabemassadas/to-openapi/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/to-openapi)](https://github.com/G4brym/to-openapi/blob/main/LICENSE)
 
 Generate OpenAPI 3.1 specs from any TypeScript schema library — Zod, ArkType, Valibot, and more.
 
@@ -72,17 +72,17 @@ Both produce a fully valid OpenAPI 3.1.0 document with schemas automatically ext
 
 ## Documentation
 
-Visit the [documentation site](https://to-openapi.dev) for the full guide, API reference, framework integrations, plugin authoring, and examples.
+Visit the [documentation site](https://to-openapi.massadas.com) for the full guide, API reference, framework integrations, plugin authoring, and examples.
 
-- [Why to-openapi?](https://to-openapi.dev/guide/why)
-- [Getting Started](https://to-openapi.dev/guide/getting-started)
-- [API Reference](https://to-openapi.dev/api/openapi-function)
-- [Plugins](https://to-openapi.dev/plugins/overview)
-- [Examples](https://to-openapi.dev/examples/crud-api)
+- [Why to-openapi?](https://to-openapi.massadas.com/guide/why)
+- [Getting Started](https://to-openapi.massadas.com/guide/getting-started)
+- [API Reference](https://to-openapi.massadas.com/api/openapi-function)
+- [Plugins](https://to-openapi.massadas.com/plugins/overview)
+- [Examples](https://to-openapi.massadas.com/examples/crud-api)
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or pull request on [GitHub](https://github.com/gabemassadas/to-openapi).
+Contributions are welcome! Please open an issue or pull request on [GitHub](https://github.com/G4brym/to-openapi).
 
 ## License
 
