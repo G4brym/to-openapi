@@ -91,7 +91,7 @@ function handleError(err: ToOpenapiError) {
       // Schema's jsonSchema.input() threw, or string ref not found
       break
     case 'INVALID_DEFINITION':
-      // Invalid definition structure
+      // Reserved for future use
       break
   }
 }
@@ -145,7 +145,7 @@ const myPlugin: ToOpenapiPlugin = {
 
   transformSchema(schema: SchemaOrRef, context: SchemaContext) {
     // Modify resolved schemas
-    // context.location is 'body' | 'query' | 'path' | 'header' | 'response' | 'component'
+    // context.location is 'body' | 'response'
     return schema
   },
 

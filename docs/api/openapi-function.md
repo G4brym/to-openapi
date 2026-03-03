@@ -70,7 +70,7 @@ interface InfoObject {
 
 Type: `Record<string, RouteShorthand>`
 
-An object whose keys are route keys in the format `"METHOD /path"` and whose values are route shorthand definitions. The method must be uppercase and the path must start with `/`.
+An object whose keys are route keys in the format `"METHOD /path"` and whose values are route shorthand definitions. The method is case-insensitive (e.g. `"GET /users"` and `"get /users"` are both valid) and the path must start with `/`.
 
 ```ts
 {
@@ -282,7 +282,7 @@ const doc = openapi({
         name: z.string(),
         species: z.string(),
       }),
-      404: 'Pet not found',
+      404: null,
     },
     'GET /health': {
       summary: 'Health check',
@@ -299,10 +299,10 @@ console.log(JSON.stringify(doc, null, 2))
 
 ## Notes
 
-- The route key format must be `"METHOD /path"` where method is one of: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`, `TRACE`. An invalid route key throws a `ToOpenapiError` with code `INVALID_ROUTE_KEY`.
+- The route key format must be `"METHOD /path"` where method is one of: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`, `TRACE` (case-insensitive). An invalid route key throws a `ToOpenapiError` with code `INVALID_ROUTE_KEY`.
 - Duplicate method+path combinations within the same definition throw a `ToOpenapiError` with code `DUPLICATE_PATH`.
 - Duplicate schema names throw a `ToOpenapiError` with code `DUPLICATE_SCHEMA`.
 - Numeric keys in a route shorthand (e.g. `200`, `404`) are treated as HTTP status code responses.
-- A string value for a status code (e.g. `404: 'Not found'`) is treated as a response with just a description.
+- A string value for a status code (e.g. `200: 'User'`) is treated as a reference to a named schema registered via `schemas`. The string must match a registered schema name.
 - A `null` value for a status code produces a response with no content body.
 - If you need to build the document incrementally, consider using the [`OpenAPI` class](./openapi-class.md) instead.

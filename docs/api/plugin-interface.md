@@ -51,7 +51,7 @@ interface RouteDefinition extends RouteShorthand {
 
 Type: `(schema: SchemaOrRef, context: SchemaContext) => SchemaOrRef` (optional)
 
-Called for each schema encountered during schema resolution. This includes request body schemas, query/path/header parameter schemas, response schemas, and named component schemas. Receives the resolved JSON schema (or `$ref` object) and a `SchemaContext` describing where the schema appears.
+Called for each schema encountered during schema resolution for request bodies and responses. Receives the resolved JSON schema (or `$ref` object) and a `SchemaContext` describing where the schema appears.
 
 Use this hook to:
 
@@ -85,16 +85,16 @@ interface SchemaContext {
 | Field | Type | Description |
 |-------|------|-------------|
 | `name` | `string \| undefined` | The component schema name, if the schema is being resolved as a named component. Otherwise `undefined`. |
-| `location` | `"body" \| "query" \| "path" \| "header" \| "response" \| "component"` | Where the schema is being used in the OpenAPI document. |
+| `location` | `"body" \| "response"` | Where the schema is being used in the OpenAPI document. |
 
 ### Location Values
 
 - `"body"` -- the schema is used as a request body.
-- `"query"` -- the schema is used to define query parameters.
-- `"path"` -- the schema is used to define path parameters.
-- `"header"` -- the schema is used to define header parameters.
 - `"response"` -- the schema is used as a response body.
-- `"component"` -- the schema is a named component in `components.schemas`.
+
+::: info
+The `SchemaContext` type also includes `"query"`, `"path"`, `"header"`, and `"component"` as possible location values for future extensibility, but `transformSchema` is currently only invoked for `"body"` and `"response"` schemas.
+:::
 
 ## Execution Order
 
@@ -122,7 +122,7 @@ const errorResponsePlugin: ToOpenapiPlugin = {
   transformRoute(route) {
     return {
       ...route,
-      500: route[500] ?? 'Internal server error',
+      500: route[500] ?? null,
     }
   },
 }

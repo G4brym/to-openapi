@@ -89,7 +89,7 @@ api.route('get', '/users/{id}', {
   tags: ['users'],
   params: z.object({ id: z.string().uuid() }),
   200: z.object({ id: z.string(), name: z.string() }),
-  404: 'User not found',
+  404: null,
 })
 ```
 
@@ -159,7 +159,7 @@ const doc = new OpenAPI({
       title: z.string(),
       completed: z.boolean(),
     }),
-    400: 'Validation error',
+    400: null,
   })
   .route('get', '/tasks/:id', {
     summary: 'Get a task',
@@ -170,14 +170,14 @@ const doc = new OpenAPI({
       title: z.string(),
       completed: z.boolean(),
     }),
-    404: 'Task not found',
+    404: null,
   })
   .route('delete', '/tasks/:id', {
     summary: 'Delete a task',
     tags: ['tasks'],
     params: z.object({ id: z.string().uuid() }),
     204: null,
-    404: 'Task not found',
+    404: null,
   })
   .document()
 ```

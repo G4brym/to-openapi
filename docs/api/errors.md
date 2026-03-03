@@ -49,12 +49,11 @@ type ToOpenapiErrorCode =
 
 Thrown when a route key in `ToOpenapiDefinition.paths` does not match the expected `"METHOD /path"` format.
 
-The method must be a valid uppercase HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`, `TRACE`) and the path must start with `/`.
+The method must be a valid HTTP method (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`, `TRACE` — case-insensitive) and the path must start with `/`.
 
 **Common causes:**
 
 - Missing space between method and path: `"GET/users"`.
-- Lowercase method: `"get /users"` (route keys require uppercase methods).
 - Missing leading slash: `"GET users"`.
 - Invalid method: `"FETCH /users"`.
 
@@ -131,7 +130,7 @@ openapi({
 
 ### `INVALID_DEFINITION`
 
-Thrown when the overall definition object is structurally invalid. This is a catch-all for definition-level validation errors that do not fit the other categories.
+Reserved for future use. This error code exists in the `ToOpenapiErrorCode` type but is not currently thrown by the library.
 
 ---
 

@@ -49,8 +49,8 @@ The three hooks fire at different stages of the pipeline:
 
 1. **`transformRoute`** -- runs once per route, before the route shorthand is expanded into an OpenAPI operation object. Use this to inject tags, security requirements, default responses, or any other per-route modifications.
 
-2. **`transformSchema`** -- runs each time a schema is resolved (for request bodies and responses). The `context` argument tells you where the schema is being used:
-   - `context.location` is one of `"body"`, `"query"`, `"path"`, `"header"`, `"response"`, or `"component"`.
+2. **`transformSchema`** -- runs each time a schema is resolved for request bodies and responses. The `context` argument tells you where the schema is being used:
+   - `context.location` is `"body"` or `"response"`.
    - `context.name` is the schema name if it is a named/registered schema (otherwise `undefined`).
 
 3. **`transformDocument`** -- runs once after the entire document has been assembled (all paths, components, servers, security, tags). Use this for document-wide modifications like adding security schemes or global metadata.

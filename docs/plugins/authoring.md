@@ -65,7 +65,7 @@ transformSchema(schema: SchemaOrRef, context: SchemaContext): SchemaOrRef
 
 Called each time a schema is resolved for a request body or response. The `context` argument tells you where the schema is being used:
 
-- `context.location` -- one of `"body"`, `"query"`, `"path"`, `"header"`, `"response"`, or `"component"`.
+- `context.location` -- either `"body"` or `"response"`.
 - `context.name` -- the registered name of the schema, if it has one (otherwise `undefined`).
 
 A `SchemaOrRef` is either a JSON Schema object (`Record<string, unknown>`) or a `$ref` reference object (`{ $ref: string }`). Your hook receives the already-resolved schema (which may be a `$ref` if it was promoted to `#/components/schemas`).

@@ -321,13 +321,9 @@ interface SchemaContext {
 ```
 
 - `name` -- the component schema name, if the schema is a named component.
-- `location` -- where the schema is being used:
+- `location` -- where the schema is being used. Currently `transformSchema` is invoked with:
   - `"body"` -- request body schema
-  - `"query"` -- query parameter schema
-  - `"path"` -- path parameter schema
-  - `"header"` -- header parameter schema
   - `"response"` -- response body schema
-  - `"component"` -- named component schema
 
 ---
 
@@ -355,7 +351,7 @@ Numeric keys (e.g. `200`, `404`) are interpreted as HTTP status code responses. 
 
 - `StandardJSONSchemaV1` -- a schema for the response body (served as `application/json`).
 - `ResponseObject` -- a full OpenAPI response object with content types, headers, etc.
-- `string` -- treated as a response with only a `description` and no content body.
+- `string` -- a reference to a named schema registered via `schemas`. Produces an `application/json` response with a `$ref` to the named component.
 - `null` -- a response with no content body (e.g. `204 No Content`).
 
 ---
