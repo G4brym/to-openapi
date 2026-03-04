@@ -29,6 +29,10 @@
 			"require": "./dist/plugins/api-key-auth.cjs"
 		}
 	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/G4brym/to-openapi"
+	},
 	"files": ["dist", "docs/**/*.md", "skills", "README.md", "LICENSE", "CHANGELOG.md"],
 	"scripts": {
 		"build": "tsup",
