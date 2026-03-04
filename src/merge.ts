@@ -69,7 +69,10 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 
 		if (source.tags) {
 			for (const tag of source.tags) {
-				if (!tagsByName.has(tag.name)) {
+				const existing = tagsByName.get(tag.name);
+				if (existing) {
+					tagsByName.set(tag.name, { ...tag, ...existing });
+				} else {
 					tagsByName.set(tag.name, tag);
 				}
 			}
@@ -88,6 +91,12 @@ export function merge(base: OpenAPIDocument, ...sources: OpenAPIDocument[]): Ope
 
 	for (const source of sources) {
 		if (source.webhooks) {
+			if (base.openapi.startsWith("3.0")) {
+				throw new ToOpenapiError(
+					"INVALID_DEFINITION",
+					"Cannot merge webhooks into an OpenAPI 3.0.x document; webhooks require OpenAPI 3.1.0",
+				);
+			}
 			for (const [name, pathItem] of Object.entries(source.webhooks)) {
 				if (!webhooks[name]) {
 					webhooks[name] = { ...pathItem };

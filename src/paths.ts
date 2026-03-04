@@ -105,3 +105,7 @@ export function extractPathParams(path: string): string[] {
 	}
 	return params;
 }
+
+export function normalizePath(path: string): string {
+	return path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (_match, param: string) => `{${param}}`);
+}

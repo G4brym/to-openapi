@@ -1,5 +1,6 @@
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { STATUS_DESCRIPTIONS, generateOperationId } from "./defaults.js";
+import { runTransformSchema } from "./plugin-runner.js";
 import type { SchemaResolver } from "./resolver.js";
 import type {
 	BodyShorthandObject,
@@ -11,7 +12,6 @@ import type {
 	ResponseObject,
 	ResponseShorthandObject,
 	RouteShorthand,
-	SchemaContext,
 	SchemaOrRef,
 	ToOpenapiPlugin,
 } from "./types.js";
@@ -22,20 +22,6 @@ import {
 	isResponseShorthandObject,
 	isStandardJSONSchema,
 } from "./utils.js";
-
-function runTransformSchema(
-	plugins: ToOpenapiPlugin[],
-	schema: SchemaOrRef,
-	context: SchemaContext,
-): SchemaOrRef {
-	let result = schema;
-	for (const plugin of plugins) {
-		if (plugin.transformSchema) {
-			result = plugin.transformSchema(result, context);
-		}
-	}
-	return result;
-}
 
 export function expandRoute(
 	parsed: ParsedRoute,
@@ -248,6 +234,7 @@ function expandBody(
 			schema = runTransformSchema(plugins, schema, { location: "body" });
 		} else {
 			schema = inferSchema(contentType) ?? { type: "object" };
+			schema = runTransformSchema(plugins, schema, { location: "body" });
 		}
 		const mediaType: MediaTypeObject = { schema };
 		if (shorthand.example !== undefined) mediaType.example = shorthand.example;
@@ -305,12 +292,11 @@ function expandResponses(
 			const contentType = shorthand.contentType ?? "application/json";
 			let schema: SchemaOrRef;
 			if (shorthand.schema) {
-				const resolved = typeof shorthand.schema === "string"
-					? resolver.resolve(shorthand.schema)
-					: resolver.resolve(shorthand.schema);
+				const resolved = resolver.resolve(shorthand.schema);
 				schema = runTransformSchema(plugins, resolved, { location: "response" });
 			} else {
 				schema = inferSchema(contentType) ?? { type: "object" };
+				schema = runTransformSchema(plugins, schema, { location: "response" });
 			}
 			const mediaType: MediaTypeObject = { schema };
 			if (shorthand.example !== undefined) mediaType.example = shorthand.example;

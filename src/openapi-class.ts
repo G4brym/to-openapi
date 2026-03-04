@@ -1,7 +1,8 @@
 import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { assembleDocument } from "./assembler.js";
 import { ToOpenapiError } from "./errors.js";
-import { extractPathParams } from "./paths.js";
+import { extractPathParams, normalizePath } from "./paths.js";
+import { runTransformDocument, runTransformRoute } from "./plugin-runner.js";
 import { SchemaResolver } from "./resolver.js";
 import { expandRoute } from "./shorthand.js";
 import type {
@@ -22,7 +23,11 @@ export class OpenAPI {
 	private readonly resolver: SchemaResolver;
 	private readonly plugins: ToOpenapiPlugin[];
 	private readonly routes: { method: HttpMethod; path: string; definition: RouteShorthand }[] = [];
-	private readonly webhookEntries: { method: HttpMethod; name: string; definition: RouteShorthand }[] = [];
+	private readonly webhookEntries: {
+		method: HttpMethod;
+		name: string;
+		definition: RouteShorthand;
+	}[] = [];
 
 	constructor(options: OpenAPIOptions) {
 		this.options = options;
@@ -56,7 +61,7 @@ export class OpenAPI {
 				path: route.path,
 			};
 
-			routeDef = this.runTransformRoute(routeDef);
+			routeDef = runTransformRoute(this.plugins, routeDef);
 
 			const finalParsed: ParsedRoute = {
 				method: route.method,
@@ -86,7 +91,7 @@ export class OpenAPI {
 					path: `/${webhook.name}`,
 				};
 
-				routeDef = this.runTransformRoute(routeDef);
+				routeDef = runTransformRoute(this.plugins, routeDef);
 
 				const finalParsed: ParsedRoute = {
 					method: webhook.method,
@@ -114,32 +119,8 @@ export class OpenAPI {
 			webhookOps,
 		);
 
-		doc = this.runTransformDocument(doc);
+		doc = runTransformDocument(this.plugins, doc);
 
 		return deepFreeze(doc) as OpenAPIDocument;
 	}
-
-	private runTransformRoute(route: RouteDefinition): RouteDefinition {
-		let result = route;
-		for (const plugin of this.plugins) {
-			if (plugin.transformRoute) {
-				result = plugin.transformRoute(result);
-			}
-		}
-		return result;
-	}
-
-	private runTransformDocument(doc: OpenAPIDocument): OpenAPIDocument {
-		let result = doc;
-		for (const plugin of this.plugins) {
-			if (plugin.transformDocument) {
-				result = plugin.transformDocument(result);
-			}
-		}
-		return result;
-	}
-}
-
-function normalizePath(path: string): string {
-	return path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (_match, param: string) => `{${param}}`);
 }

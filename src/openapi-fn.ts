@@ -2,6 +2,7 @@ import type { StandardJSONSchemaV1 } from "@standard-schema/spec";
 import { assembleDocument } from "./assembler.js";
 import { ToOpenapiError } from "./errors.js";
 import { extractPathParams, parseRouteKey, parseWebhookKey } from "./paths.js";
+import { runTransformDocument, runTransformRoute } from "./plugin-runner.js";
 import { SchemaResolver } from "./resolver.js";
 import { expandRoute } from "./shorthand.js";
 import type {
@@ -11,7 +12,6 @@ import type {
 	ParsedRoute,
 	RouteDefinition,
 	ToOpenapiDefinition,
-	ToOpenapiPlugin,
 } from "./types.js";
 import { deepFreeze } from "./utils.js";
 
@@ -106,24 +106,4 @@ export function openapi(definition: ToOpenapiDefinition): OpenAPIDocument {
 	doc = runTransformDocument(plugins, doc);
 
 	return deepFreeze(doc) as OpenAPIDocument;
-}
-
-function runTransformRoute(plugins: ToOpenapiPlugin[], route: RouteDefinition): RouteDefinition {
-	let result = route;
-	for (const plugin of plugins) {
-		if (plugin.transformRoute) {
-			result = plugin.transformRoute(result);
-		}
-	}
-	return result;
-}
-
-function runTransformDocument(plugins: ToOpenapiPlugin[], doc: OpenAPIDocument): OpenAPIDocument {
-	let result = doc;
-	for (const plugin of plugins) {
-		if (plugin.transformDocument) {
-			result = plugin.transformDocument(result);
-		}
-	}
-	return result;
 }

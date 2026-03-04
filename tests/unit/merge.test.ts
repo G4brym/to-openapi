@@ -311,7 +311,7 @@ describe("merge", () => {
 			expect(result.paths["/users"]).toBeDefined();
 		});
 
-		it("source webhooks included even when base is 3.0.3 (no version check in merge)", () => {
+		it("throws INVALID_DEFINITION when merging webhooks into a 3.0.x base", () => {
 			const base: OpenAPIDocument = {
 				openapi: "3.0.3" as any,
 				info: { title: "Test", version: "1.0.0" },
@@ -321,16 +321,17 @@ describe("merge", () => {
 				webhooks: { orderCreated: { post: { operationId: "orderCreated" } } },
 			});
 
-			const result = merge(base, source);
-			expect(result.openapi).toBe("3.0.3");
-			expect(result.webhooks?.orderCreated?.post).toBeDefined();
+			expect(() => merge(base, source)).toThrow(ToOpenapiError);
+			expect(() => merge(base, source)).toThrow("webhooks");
 		});
 
 		it("frozen base with overlapping paths throws TypeError on mutation", () => {
 			// deepFreeze imported at top of file
-			const base = deepFreeze(makeDoc({
-				paths: { "/tasks": { get: { operationId: "get_tasks" } } },
-			}));
+			const base = deepFreeze(
+				makeDoc({
+					paths: { "/tasks": { get: { operationId: "get_tasks" } } },
+				}),
+			);
 			const source = makeDoc({
 				paths: { "/tasks": { post: { operationId: "post_tasks" } } },
 			});
@@ -340,9 +341,11 @@ describe("merge", () => {
 
 		it("frozen base with disjoint paths works fine", () => {
 			// deepFreeze imported at top of file
-			const base = deepFreeze(makeDoc({
-				paths: { "/tasks": { get: { operationId: "get_tasks" } } },
-			}));
+			const base = deepFreeze(
+				makeDoc({
+					paths: { "/tasks": { get: { operationId: "get_tasks" } } },
+				}),
+			);
 			const source = makeDoc({
 				paths: { "/users": { get: { operationId: "get_users" } } },
 			});

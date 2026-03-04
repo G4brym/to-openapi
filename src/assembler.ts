@@ -28,6 +28,7 @@ export function assembleDocument(
 	webhooks?: { method: HttpMethod; name: string; operation: OperationObject }[],
 ): OpenAPIDocument {
 	const paths: Record<string, PathItemObject> = {};
+	const operationIds = new Set<string>();
 
 	for (const route of routes) {
 		if (!paths[route.path]) {
@@ -41,6 +42,16 @@ export function assembleDocument(
 				"DUPLICATE_PATH",
 				`Duplicate operation: ${route.method.toUpperCase()} ${route.path}`,
 			);
+		}
+
+		if (route.operation.operationId) {
+			if (operationIds.has(route.operation.operationId)) {
+				throw new ToOpenapiError(
+					"DUPLICATE_PATH",
+					`Duplicate operationId: "${route.operation.operationId}"`,
+				);
+			}
+			operationIds.add(route.operation.operationId);
 		}
 
 		pathItem[route.method] = route.operation;
