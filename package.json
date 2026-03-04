@@ -29,14 +29,7 @@
 			"require": "./dist/plugins/api-key-auth.cjs"
 		}
 	},
-	"files": [
-		"dist",
-		"docs/**/*.md",
-		"skills",
-		"README.md",
-		"LICENSE",
-		"CHANGELOG.md"
-	],
+	"files": ["dist", "docs/**/*.md", "skills", "README.md", "LICENSE", "CHANGELOG.md"],
 	"scripts": {
 		"build": "tsup",
 		"check": "biome check .",
@@ -61,9 +54,13 @@
 		"@changesets/cli": "^2.30.0",
 		"@seriousme/openapi-schema-validator": "^2.8.0",
 		"@standard-schema/spec": "^1.1.0",
+		"@valibot/to-json-schema": "^1.5.0",
+		"arktype": "^2.1.29",
 		"tsup": "^8.0.0",
 		"typescript": "^5.7.0",
+		"valibot": "^1.2.0",
 		"vitepress": "^1.6.4",
-		"vitest": "^3.0.0"
+		"vitest": "^3.0.0",
+		"zod": "^4.3.6"
 	}
 }

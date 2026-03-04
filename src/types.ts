@@ -199,7 +199,12 @@ export interface RouteShorthand {
 	tags?: string[];
 	deprecated?: boolean;
 	security?: SecurityRequirementObject[];
-	[statusCode: number]: StandardJSONSchemaV1 | ResponseObject | ResponseShorthandObject | string | null;
+	[statusCode: number]:
+		| StandardJSONSchemaV1
+		| ResponseObject
+		| ResponseShorthandObject
+		| string
+		| null;
 	[key: `x-${string}`]: unknown;
 }
 

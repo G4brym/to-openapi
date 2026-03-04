@@ -5,9 +5,7 @@
 	"build": {
 		"command": "vitepress build"
 	},
-	"routes": [
-		{ "pattern": "to-openapi.massadas.com", "custom_domain": true }
-	],
+	"routes": [{ "pattern": "to-openapi.massadas.com", "custom_domain": true }],
 	"assets": {
 		"directory": "./.vitepress/dist"
 	}

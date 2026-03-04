@@ -1,4 +1,12 @@
 import { describe, expectTypeOf, it } from "vitest";
+import type { ApiKeyAuthOptions } from "../../src/plugins/api-key-auth";
+import { apiKeyAuth } from "../../src/plugins/api-key-auth";
+import type { AutoTagsOptions } from "../../src/plugins/auto-tags";
+import { autoTags } from "../../src/plugins/auto-tags";
+import type { BearerAuthOptions } from "../../src/plugins/bearer-auth";
+import { bearerAuth } from "../../src/plugins/bearer-auth";
+import type { ErrorResponseEntry } from "../../src/plugins/error-responses";
+import { errorResponses } from "../../src/plugins/error-responses";
 import type {
 	OpenAPIDocument,
 	RouteDefinition,
@@ -6,14 +14,6 @@ import type {
 	SchemaOrRef,
 	ToOpenapiPlugin,
 } from "../../src/types";
-import type { ApiKeyAuthOptions } from "../../src/plugins/api-key-auth";
-import type { AutoTagsOptions } from "../../src/plugins/auto-tags";
-import type { BearerAuthOptions } from "../../src/plugins/bearer-auth";
-import type { ErrorResponseEntry } from "../../src/plugins/error-responses";
-import { apiKeyAuth } from "../../src/plugins/api-key-auth";
-import { autoTags } from "../../src/plugins/auto-tags";
-import { bearerAuth } from "../../src/plugins/bearer-auth";
-import { errorResponses } from "../../src/plugins/error-responses";
 
 describe("plugin types", () => {
 	describe("ToOpenapiPlugin", () => {

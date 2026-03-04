@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from "vitest";
-import { ToOpenapiError } from "../../src/errors";
+import type { ToOpenapiError } from "../../src/errors";
 import type { ToOpenapiErrorCode } from "../../src/errors";
 
 describe("error types", () => {

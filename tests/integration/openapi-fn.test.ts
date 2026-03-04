@@ -180,10 +180,7 @@ describe("openapi()", () => {
 			...baseDefinition,
 			paths: {
 				"GET /tasks": {
-					cookies: createMockObjectSchema(
-						{ session: { type: "string" } },
-						["session"],
-					),
+					cookies: createMockObjectSchema({ session: { type: "string" } }, ["session"]),
 					200: createMockSchema({ type: "array" }),
 				},
 			},
@@ -246,7 +243,10 @@ describe("openapi()", () => {
 			paths: {
 				"POST /upload": {
 					body: {
-						schema: createMockSchema({ type: "object", properties: { file: { type: "string", format: "binary" } } }),
+						schema: createMockSchema({
+							type: "object",
+							properties: { file: { type: "string", format: "binary" } },
+						}),
 						contentType: "multipart/form-data",
 					} as any,
 					201: null,

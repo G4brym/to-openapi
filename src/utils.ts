@@ -38,7 +38,7 @@ export function deepFreeze<T extends object>(obj: T): Readonly<T> {
 }
 
 export function isStandardJSONSchema(value: unknown): boolean {
-	if (value === null || typeof value !== "object") {
+	if (value === null || (typeof value !== "object" && typeof value !== "function")) {
 		return false;
 	}
 	const std = (value as Record<string, unknown>)["~standard"];
@@ -54,8 +54,13 @@ export function isResponseShorthandObject(value: unknown): boolean {
 	if (isStandardJSONSchema(value)) return false;
 	const obj = value as Record<string, unknown>;
 	if ("content" in obj) return false;
-	return "schema" in obj || "contentType" in obj || "headers" in obj
-		|| "example" in obj || "examples" in obj;
+	return (
+		"schema" in obj ||
+		"contentType" in obj ||
+		"headers" in obj ||
+		"example" in obj ||
+		"examples" in obj
+	);
 }
 
 export function isBodyShorthandObject(value: unknown): boolean {

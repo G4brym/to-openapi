@@ -98,7 +98,11 @@ describe("apiKeyAuth plugin", () => {
 	});
 
 	it("supports description option", () => {
-		const plugin = apiKeyAuth({ name: "X-API-Key", in: "header", description: "API key for authentication" });
+		const plugin = apiKeyAuth({
+			name: "X-API-Key",
+			in: "header",
+			description: "API key for authentication",
+		});
 		const doc = plugin.transformDocument?.(baseDoc);
 		expect(doc.components?.securitySchemes?.apiKeyAuth).toEqual({
 			type: "apiKey",

@@ -177,7 +177,9 @@ describe("isResponseShorthandObject", () => {
 	});
 
 	it("returns true for object with headers", () => {
-		expect(isResponseShorthandObject({ headers: { "x-rate-limit": { schema: { type: "integer" } } } })).toBe(true);
+		expect(
+			isResponseShorthandObject({ headers: { "x-rate-limit": { schema: { type: "integer" } } } }),
+		).toBe(true);
 	});
 
 	it("returns true for object with example", () => {

@@ -227,7 +227,9 @@ describe("document types", () => {
 		});
 
 		it("rejects missing description", () => {
-			expectTypeOf<{ content: Record<string, MediaTypeObject> }>().not.toMatchTypeOf<ResponseObject>();
+			expectTypeOf<{
+				content: Record<string, MediaTypeObject>;
+			}>().not.toMatchTypeOf<ResponseObject>();
 		});
 	});
 

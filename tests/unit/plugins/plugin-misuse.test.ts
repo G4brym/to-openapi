@@ -112,9 +112,8 @@ describe("plugin misuse", () => {
 			},
 		});
 
-		const bodySchema = (doc.paths["/test"]?.post?.requestBody as any)?.content?.[
-			"application/json"
-		]?.schema;
+		const bodySchema = (doc.paths["/test"]?.post?.requestBody as any)?.content?.["application/json"]
+			?.schema;
 		expect(bodySchema).toBeUndefined();
 	});
 

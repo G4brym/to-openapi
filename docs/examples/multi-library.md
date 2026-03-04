@@ -156,31 +156,47 @@ const spec = openapi({
 
 ## With Valibot
 
+Valibot v1.x does not natively implement `~standard.jsonSchema`. You need the official [`@valibot/to-json-schema`](https://github.com/fabian-hiller/valibot/tree/main/packages/to-json-schema) extension to wrap schemas before passing them to `openapi()`.
+
+```bash
+npm install @valibot/to-json-schema
+```
+
 ```ts
 import * as v from "valibot";
+import { toStandardJsonSchema } from "@valibot/to-json-schema";
 import { openapi } from "to-openapi";
 
-const UserSchema = v.object({
-  id: v.pipe(v.string(), v.uuid()),
-  name: v.pipe(v.string(), v.minLength(1)),
-  email: v.pipe(v.string(), v.email()),
-  createdAt: v.pipe(v.string(), v.isoTimestamp()),
-});
+// Define Valibot schemas as normal, then wrap with toStandardJsonSchema
+const UserSchema = toStandardJsonSchema(
+  v.object({
+    id: v.pipe(v.string(), v.uuid()),
+    name: v.pipe(v.string(), v.minLength(1)),
+    email: v.pipe(v.string(), v.email()),
+    createdAt: v.pipe(v.string(), v.isoTimestamp()),
+  }),
+);
 
-const CreateUserSchema = v.object({
-  name: v.pipe(v.string(), v.minLength(1)),
-  email: v.pipe(v.string(), v.email()),
-});
+const CreateUserSchema = toStandardJsonSchema(
+  v.object({
+    name: v.pipe(v.string(), v.minLength(1)),
+    email: v.pipe(v.string(), v.email()),
+  }),
+);
 
-const UpdateUserSchema = v.object({
-  name: v.optional(v.pipe(v.string(), v.minLength(1))),
-  email: v.optional(v.pipe(v.string(), v.email())),
-});
+const UpdateUserSchema = toStandardJsonSchema(
+  v.object({
+    name: v.optional(v.pipe(v.string(), v.minLength(1))),
+    email: v.optional(v.pipe(v.string(), v.email())),
+  }),
+);
 
-const ErrorSchema = v.object({
-  message: v.string(),
-  code: v.string(),
-});
+const ErrorSchema = toStandardJsonSchema(
+  v.object({
+    message: v.string(),
+    code: v.string(),
+  }),
+);
 
 const spec = openapi({
   info: {
@@ -234,6 +250,8 @@ const spec = openapi({
 All three examples produce the same OpenAPI document structure. to-openapi never imports or depends on Zod, ArkType, or Valibot directly. Instead, it reads schemas through the [Standard Schema](https://github.com/standard-schema/standard-schema) interface -- a vendor-neutral protocol that all three libraries implement.
 
 Each schema library exposes a `~standard` property containing a `jsonSchema` field. to-openapi reads that JSON Schema representation and converts it into OpenAPI-compatible schema objects. The library you choose is purely a matter of preference.
+
+> **Note on Valibot:** Zod and ArkType natively implement `~standard.jsonSchema`, so their schemas work directly with `openapi()`. Valibot v1.x only provides `~standard.validate` -- it does not include JSON Schema support out of the box. The official `@valibot/to-json-schema` package bridges this gap by wrapping Valibot schemas with the `toStandardJsonSchema()` function, which adds the required `~standard.jsonSchema` interface.
 
 This also means you can mix libraries within the same project. If one team prefers Zod and another prefers ArkType, both can define schemas independently and pass them to the same `openapi()` call.
 
