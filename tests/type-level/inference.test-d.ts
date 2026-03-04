@@ -7,6 +7,7 @@ import { openapi } from "../../src/openapi-fn";
 import type {
 	HttpMethod,
 	OpenAPIDocument,
+	OpenAPIOptions,
 	RouteShorthand,
 	ToOpenapiDefinition,
 	ToOpenapiPlugin,
@@ -55,5 +56,35 @@ describe("type-level inference", () => {
 		const api = new OpenAPI({ info: { title: "T", version: "1" } });
 		expectTypeOf(api.schema("n", {} as StandardJSONSchemaV1)).toEqualTypeOf<typeof api>();
 		expectTypeOf(api.route("get", "/", {})).toEqualTypeOf<typeof api>();
+	});
+
+	it("OpenAPI.webhook() returns this for chaining", () => {
+		const api = new OpenAPI({ info: { title: "T", version: "1" } });
+		expectTypeOf(api.webhook("post", "orderCreated", {})).toEqualTypeOf<typeof api>();
+	});
+
+	it("ToOpenapiDefinition accepts full definition with all fields", () => {
+		expectTypeOf<{
+			info: { title: string; version: string };
+			paths: Record<string, RouteShorthand>;
+			webhooks: Record<string, RouteShorthand>;
+			schemas: Record<string, StandardJSONSchemaV1>;
+			plugins: ToOpenapiPlugin[];
+			openapi: "3.1.0";
+			servers: [{ url: string }];
+			security: [{ bearerAuth: [] }];
+			securitySchemes: Record<string, { type: "http" }>;
+			tags: [{ name: string }];
+			externalDocs: { url: string };
+		}>().toMatchTypeOf<ToOpenapiDefinition>();
+	});
+
+	it("OpenAPIOptions accepts valid options", () => {
+		expectTypeOf<{
+			info: { title: string; version: string };
+			openapi: "3.0.3";
+			servers: [{ url: string }];
+			plugins: ToOpenapiPlugin[];
+		}>().toMatchTypeOf<OpenAPIOptions>();
 	});
 });
