@@ -93,6 +93,7 @@ export default defineConfig({
 						{ text: "Multi-Library", link: "/examples/multi-library" },
 						{ text: "Cloudflare Workers", link: "/examples/cloudflare-workers" },
 						{ text: "Microservices", link: "/examples/microservices" },
+						{ text: "Multi-Content-Type", link: "/examples/multi-content-type" },
 					],
 				},
 			],
