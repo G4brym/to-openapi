@@ -1,6 +1,6 @@
 {
 	"name": "to-openapi",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"type": "module",
 	"exports": {
 		".": {
@@ -29,7 +29,14 @@
 			"require": "./dist/plugins/api-key-auth.cjs"
 		}
 	},
-	"files": ["dist", "docs/**/*.md", "skills", "README.md", "LICENSE", "CHANGELOG.md"],
+	"files": [
+		"dist",
+		"docs/**/*.md",
+		"skills",
+		"README.md",
+		"LICENSE",
+		"CHANGELOG.md"
+	],
 	"scripts": {
 		"build": "tsup",
 		"check": "biome check .",
