@@ -29,6 +29,7 @@
 			"require": "./dist/plugins/api-key-auth.cjs"
 		}
 	},
+	"homepage": "https://to-openapi.massadas.com",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/G4brym/to-openapi"
