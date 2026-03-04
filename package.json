@@ -29,14 +29,7 @@
 			"require": "./dist/plugins/api-key-auth.cjs"
 		}
 	},
-	"files": [
-		"dist",
-		"docs/**/*.md",
-		"skills",
-		"README.md",
-		"LICENSE",
-		"CHANGELOG.md"
-	],
+	"files": ["dist", "docs/**/*.md", "skills", "README.md", "LICENSE", "CHANGELOG.md"],
 	"scripts": {
 		"build": "tsup",
 		"check": "biome check .",

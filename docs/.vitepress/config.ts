@@ -33,6 +33,14 @@ export default defineConfig({
 					],
 				},
 				{
+					text: "Schema Libraries",
+					items: [
+						{ text: "Zod", link: "/guide/zod" },
+						{ text: "ArkType", link: "/guide/arktype" },
+						{ text: "Valibot", link: "/guide/valibot" },
+					],
+				},
+				{
 					text: "Advanced",
 					items: [
 						{ text: "Composing Specs", link: "/guide/composing" },
